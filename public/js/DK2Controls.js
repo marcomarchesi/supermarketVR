@@ -36,6 +36,7 @@ THREE.DK2Controls = function(camera) {
   this.headQuat = new THREE.Quaternion();
   
   this.translationSpeed  = 5;
+  this.lookSpeed = 0;
   
   this.wasd = {
     left: false,
@@ -88,13 +89,13 @@ THREE.DK2Controls = function(camera) {
             this.wasd.left = true;
             break;
 
-        case 82: /*R*/
-            this.moveUp = true; 
-            break;
+        // case 82: /*R*/
+        //     this.moveUp = true; 
+        //     break;
 
-        case 70: /*F*/
-            this.moveDown = true;
-            break;
+        // case 70: /*F*/
+        //     this.moveDown = true;
+        //     break;
       }
 
     }
@@ -121,13 +122,13 @@ THREE.DK2Controls = function(camera) {
           this.wasd.left = false;
           break;
 
-      case 82: /*R*/
-          this.moveUp = false; 
-          break;
+      // case 82: /*R*/
+      //     this.moveUp = false; 
+      //     break;
 
-      case 70: /*F*/
-          this.moveDown = false;
-          break;
+      // case 70: /*F*/
+      //     this.moveDown = false;
+      //     break;
     }
   };
 
@@ -138,18 +139,22 @@ THREE.DK2Controls = function(camera) {
       var id = this.sensorData[0];
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
-        this.headQuat.set(this.sensorData[4], this.sensorData[5], this.sensorData[6], this.sensorData[7]);
-          
+        this.headQuat.set(this.sensorData[4], this.sensorData[5]+this.lookSpeed, this.sensorData[6], this.sensorData[7]);
+
+        console.log(this.sensorData[5]);  //Axis of interest?
+
         this.camera.setRotationFromQuaternion(this.headQuat);
+
         this.controller.setRotationFromMatrix(this.camera.matrix);        
       }
 
       this.lastId = id;
     }
 
-    // update position
-    if (this.wasd.up)
-      this.controller.translateZ(-this.translationSpeed * delta*walkingFactor);
+    // update position TODO here for rotate the cart ???
+    if (this.wasd.up){
+      this.controller.translateZ(-this.translationSpeed * delta * walkingFactor);
+    }
 
     if (this.wasd.down)
       this.controller.translateZ(this.translationSpeed * delta);
@@ -164,8 +169,12 @@ THREE.DK2Controls = function(camera) {
       this.controller.translateY( this.translationSpeed * delta );
     if (this.moveDown)
       this.controller.translateY( - this.translationSpeed * delta );
+
+     //UNDER TEST
+      // this.camera.rotation.y = -this.lookSpeed;
+      //console.log("look speed is " + this.lookSpeed);
     
-    this.camera.position.addVectors(this.controller.position, this.headPos);
+    this.camera.position.addVectors(this.controller.position,this.camera.rotation, this.headPos);
 
     if (this.camera.position.y < -10) {
         this.camera.position.y = -10;
