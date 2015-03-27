@@ -15,7 +15,6 @@
   <body>
     
     <script type="text/javascript" src="js/three.min.js"></script>
-    <script type="text/javascript" src="js/physi.js"></script>
     <script type="text/javascript" src="js/stats.min.js"></script>
     <script type="text/javascript" src="js/FirstPersonControls.js"></script>
     <script type="text/javascript" src="js/JSONLoader.js"></script>
@@ -23,13 +22,9 @@
     <script type="text/javascript" src="js/DK2Controls.js"></script>
     <script type="text/javascript" src="js/dat.gui.min.js"></script>
     <script type="text/javascript" src="js/HUD.js"></script>
-    <script type="text/javascript" src="js/physi.js"></script>
     <script src="js/socket.io.js"></script>
-    <script type="text/javascript">
 
-      'use strict';
-      Physijs.scripts.worker = 'js/physijs_worker.js';
-      Physijs.scripts.ammo = 'ammo.js';
+    <script type="text/javascript">
 
       var socket = io.connect('http://localhost:8080');
 
@@ -60,7 +55,7 @@
       // game state
       var pause = false;
 
-      var scene_mesh;
+      var scene_mesh, boundingBoxMesh;
       var light;
       var ambientLightColor = ARTIFICIAL_LIGHT;
 
@@ -69,11 +64,15 @@
       var clock = new THREE.Clock();
       var delta;
 
-      var walkingFactor = 0;
+      var walkingFactor = 1;
 
       var cube;
 
       var stats;
+
+      var rdy = false;
+
+      var previousPosition, actualPosition;
 
 
       function init() {
@@ -95,14 +94,12 @@
 
       window.onkeydown = function(e) {
           var key = e.keyCode ? e.keyCode : e.which;
-
           /*
           // 16 = shift
           if (key == 16) {
              running = 1;
           }
           */
-
       }
 
       window.onkeyup = function(e) {
@@ -131,6 +128,7 @@
           // 79 = o
           if (key == 79) {
             oculusEnabled = oculusEnabled ? false : true;
+            setControls();
           }
 
           // 72 = h
@@ -141,8 +139,7 @@
       }
 
       // create a scene, that will hold all our elements such as objects, cameras and lights.
-      scene = new Physijs.Scene;
-      scene.setGravity(new THREE.Vector3(0, -30, 0));
+      scene = new THREE.Scene;
 
       // create a render, sets the background color and the size
       renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
@@ -158,11 +155,23 @@
       // create cameras.
       // camera is the normal camera and  will be controlled by FirstPersonControls.js/DK2Controls.js
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 30);
+      camera.position.x = 0;
+      camera.position.y = 0;
+      camera.position.z = 0;
 
-      // position and point the default camera to the center of the scene
-      camera.position.x = -1.8;
-      camera.position.y = 2;
-      camera.position.z = 5.4;
+      // add a random cube to the scene
+      var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
+      var cubeMaterial = new THREE.MeshLambertMaterial({ color: "red" });
+      cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      cube.castShadow = true;
+      cube.position.x = 0;
+      cube.position.y = 0;
+      cube.position.z = 0;
+
+      actualPosition = cube.position.clone();
+
+      cube.add(camera);
+      scene.add(cube);
       
       // --- hud
       // create a scene that will hold all hud elements and an ortho camera to always show them on top of the game scene
@@ -203,17 +212,16 @@
             data.yaw = -5;
           /****************/
 
-          if (data.pitch>0.5){
+          if (data.pitch>0.5) {
             controls.moveForward = true ;
             walkingFactor = data.pitch/1.5;
             controls.lookSpeed = degreesToRadians(data.yaw*1.5);
-          }else{
+          } else{
             controls.moveForward = false;
             walkingFactor = 0;
             controls.lookSpeed = degreesToRadians(data.yaw*4);
           }
           console.log(data.yaw);
-
       });
 
       // add the output of the renderer to the html element
@@ -225,14 +233,14 @@
 
     function setControls() {
       // Oculus DK2 controls
-      if(oculusEnabled == true)
-        controls = new THREE.DK2Controls(camera);
-      else {
-        controls = new THREE.FirstPersonControls(camera);
-        controls.movementSpeed = 2;
-        controls.lookSpeed = 0.00;
-        controls.lookVertical = false;  //TODO true
-      }
+      //if(oculusEnabled == true)
+        controls = new THREE.DK2Controls(cube);
+      //else {
+      //  controls = new THREE.FirstPersonControls(cube);
+      //  controls.movementSpeed = 2;
+      //  controls.lookSpeed = 0.05;
+      //  controls.lookVertical = false;  //TODO true
+      //}
     }
 
     function degreesToRadians(degree){
@@ -240,40 +248,37 @@
     }
     
     function render(dt) {
+      if(rdy) {
+        delta = clock.getDelta();
 
-      delta = clock.getDelta();
+        //lock the camera to height = 2
+        cube.position.y = 1;
+        camera.position.y = 1;
+        // ---
 
-      controls.update(delta);
+        // update HUD
+        HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
 
-      //lock the camera to height = 2
-      camera.position.y = 2;
-      // ---
+        // update
+        renderer.autoClear = false;
+        if(oculusEnabled == true) {
+          oculusRenderer.render( scene, cube, HUDscene);
+        }
+        else {
+          // if we just switched to the normal renderer from the oculusRenderer, we have to reset the render area size
+          renderer.setSize(window.innerWidth, window.innerHeight);
 
-      // update HUD
-      HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
+          renderer.clear();
+          renderer.render(scene, camera);
+          renderer.render(HUDscene, HUDcamera);
+        }
 
-      // update
-      renderer.autoClear = false;
-      if(oculusEnabled == true) {
-        oculusRenderer.render( scene, camera, HUDscene);
+        controls.update(delta);
+        stats.update();     
       }
-      else {
-        // if we just switched to the normal renderer from the oculusRenderer, we have to reset the render area size
-        renderer.setSize(window.innerWidth, window.innerHeight);
 
-        renderer.clear();
-        renderer.render(scene, camera);
-        renderer.render(HUDscene, HUDcamera);
-      }
-
-      stats.update();
-
-      scene.simulate(); // run physics
-
-      requestAnimationFrame( render );      
+      requestAnimationFrame( render ); 
     }
-
-    var prevX = -10000, prevY = -10000;
 
     function addStats() {
       stats = new Stats();
@@ -288,15 +293,27 @@
     function loadScene() {
       loader.load("./models/market.js",
       function(model, materials) {
-        scene_mesh  = new Physijs.BoxMesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); // the mass is 0
+        scene_mesh = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials )); // the mass is 0
         scene_mesh.name = 'scene';
         scene_mesh.receiveShadow = true;
         scene_mesh.castShadow = true;
-        scene.add(scene_mesh);
+        //scene.add(scene_mesh);
 
         // i'm getting the scale factor here because 'scene_mesh' is loaded asynchronously
         getSceneAndMapDimesion(scene_mesh);          
       });
+
+      loader.load("./models/market_bb.js",
+      function(model, materials) {
+        boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue" })); 
+        boundingBoxMesh.name = 'boundingBoxMesh';
+        boundingBoxMesh.receiveShadow = true;
+        boundingBoxMesh.castShadow = true;
+        scene.add(boundingBoxMesh);        
+
+        rdy = true;
+      });
+
     }
 
     function getSceneAndMapDimesion(scene_mesh) {

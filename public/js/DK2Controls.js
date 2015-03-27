@@ -16,9 +16,11 @@ Copyright 2014 Lars Ivar Hatledal
    @modified by Pierfrancesco Soffritti
 */
 
-THREE.DK2Controls = function(camera) {
+var lastNotCollidingPositionX = 0, lastNotCollidingPositionZ = 0;
 
-  this.camera = camera;
+THREE.DK2Controls = function(object) {
+
+  this.object = object;
   this.ws;
   this.sensorData;
   this.lastId = -1;
@@ -139,9 +141,10 @@ THREE.DK2Controls = function(camera) {
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
         this.headQuat.set(this.sensorData[4], this.sensorData[5], this.sensorData[6], this.sensorData[7]);
-          
-        this.camera.setRotationFromQuaternion(this.headQuat);
-        this.controller.setRotationFromMatrix(this.camera.matrix);        
+        
+
+        this.object.setRotationFromQuaternion(this.headQuat);
+        this.controller.setRotationFromMatrix(this.object.matrix);        
       }
 
       this.lastId = id;
@@ -165,17 +168,19 @@ THREE.DK2Controls = function(camera) {
     if (this.moveDown)
       this.controller.translateY( - this.translationSpeed * delta );
     
-    this.camera.position.addVectors(this.controller.position, this.headPos);
+    this.object.position.addVectors(this.controller.position, this.headPos);
 
-    if (this.camera.position.y < -10) {
-        this.camera.position.y = -10;
-      }
+    //if (this.object.position.y < -10) {
+    //   this.object.position.y = -10;
+    // }
 
       if (ws) {
         if (ws.readyState === 1) {
           ws.send("get\n");
         }
       } 
+
+      handleCollisions(this.object, this.controller)
   };
   
   window.addEventListener( 'keydown', bind( this, this.onKeyDown ), false );
@@ -190,5 +195,44 @@ THREE.DK2Controls = function(camera) {
     };
 
   };
+
+  function handleCollisions(movingObject, controller) {
+    // collision detection:
+    //   determines if any of the rays from the cube's origin to each vertex
+    //   intersects any face of a mesh in the array of target meshes
+    //   for increased collision accuracy, add more vertices to the cube;
+    //   for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
+    //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+    
+    actualPosition = controller.position.clone();
+    var objectsArray = new Array();
+    objectsArray.push(boundingBoxMesh);
+    //clearText();
+    
+    for (var vertexIndex = 0; vertexIndex < movingObject.geometry.vertices.length; vertexIndex++) {   
+      var localVertex = movingObject.geometry.vertices[vertexIndex].clone();
+      var globalVertex = localVertex.applyMatrix4( movingObject.matrix );
+      var directionVector = globalVertex.sub( controller.position );
+      
+      var ray = new THREE.Raycaster( actualPosition, directionVector.clone().normalize() );
+      var collisionResults = ray.intersectObjects( objectsArray );
+      
+      if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+        // collision detected
+        console.log("collision");
+        controller.position.x = lastNotCollidingPositionX;
+        controller.position.z = lastNotCollidingPositionZ;
+
+        actualPosition = previousPosition;
+      } else {
+        lastNotCollidingPositionX = controller.position.x;
+        lastNotCollidingPositionZ = controller.position.z;
+      }
+
+      //console.log("obj: " +movingObject.position.x, movingObject.position.y, movingObject.position.z)
+      //console.log("cnt: " +controller.position.x, controller.position.y, controller.position.z)
+
+    }
+  }
   
 };
