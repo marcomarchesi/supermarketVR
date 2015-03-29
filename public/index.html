@@ -53,6 +53,7 @@
       var pause = false;
 
       var scene_mesh,cart_mesh;
+      var mesh;
       var light;
       var ambientLightColor = ARTIFICIAL_LIGHT;
 
@@ -62,11 +63,11 @@
       var delta;
 
       var walkingFactor = 1;
+      var MOVE_FACTOR = 2;
 
       var cube;
 
       var stats;
-
 
       function init() {
 
@@ -149,12 +150,12 @@
 
       // create cameras.
       // camera is the normal camera and  will be controlled by FirstPersonControls.js/DK2Controls.js
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 30);
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 30);
 
       // position and point the default camera to the center of the scene
       camera.position.x = -1.8;
-      camera.position.y = 5;
       camera.position.z = 5.4;
+      
       
       // --- hud
       // create a scene that will hold all hud elements and an ortho camera to always show them on top of the game scene
@@ -232,12 +233,21 @@
     
     function render(dt) {
 
+      // camera.updateProjectionMatrix();
+
       delta = clock.getDelta();
-      controls.update(delta);
+      controls.update(delta/MOVE_FACTOR);
 
       //lock the camera to height = 5
       camera.position.y = 5;
       // ---
+
+      // //bind a cube in front of the camera NOT WORKING YET
+      // var zCamVec = new THREE.Vector3(0,4,-5);
+      // var pos = camera.localToWorld(zCamVec);
+      // mesh.position.set(pos.x, pos.y, pos.z);
+      // // mesh.lookAt(camera.position);
+
 
       // update HUD
       HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
@@ -255,9 +265,7 @@
         renderer.render(scene, camera);
         renderer.render(HUDscene, HUDcamera);
       }
-
       stats.update();
-
       requestAnimationFrame( render );      
     }
 
@@ -278,9 +286,9 @@
       function(model, materials) {
         scene_mesh  = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); // the mass is 0
         scene_mesh.name = 'scene';
-        scene_mesh.scale.x = 7.5;
-        scene_mesh.scale.y = 7.5;
-        scene_mesh.scale.z = 7.5;
+        scene_mesh.scale.x = 10;
+        scene_mesh.scale.y = 10;
+        scene_mesh.scale.z = 10; 
         scene_mesh.receiveShadow = true;
         scene_mesh.castShadow = true;
         scene.add(scene_mesh);
@@ -296,6 +304,7 @@
         cart_mesh.receiveShadow = true;
         cart_mesh.castShadow = true;
         cart_mesh.position.y = 2.5;
+        cart_mesh.position.set( 0, 0, - 3);
         scene.add(cart_mesh); 
       });
     }
