@@ -174,7 +174,8 @@ THREE.OculusRiftEffect = function ( renderer, options ) {
 		renderer.setSize( width, height );
 	};
 
-	this.render = function (scene, camera, HUDscene) {
+	// moving object is the camera or the object the camera is attached to (eg. a bounding box for collision detection)
+	this.render = function (scene, movingObject, HUDscene) {
 		var cc = renderer.getClearColor().clone();
 
 		// Clear
@@ -182,15 +183,15 @@ THREE.OculusRiftEffect = function ( renderer, options ) {
 		renderer.clear();
 		renderer.setClearColor(cc);
 
-		// camera parameters
-		if (camera.matrixAutoUpdate) camera.updateMatrix();
+		// object parameters
+		if (movingObject.matrixAutoUpdate) movingObject.updateMatrix();
 
 		// Render left
 		//this.preLeftRender();
 
 		pCamera.projectionMatrix.copy(left.proj);
 
-		pCamera.matrix.copy(camera.matrix).multiply(left.tranform);
+		pCamera.matrix.copy(movingObject.matrix).multiply(left.tranform);
 		pCamera.matrixWorldNeedsUpdate = true;
 
 		renderer.setViewport(left.viewport[0], left.viewport[1], left.viewport[2], left.viewport[3]);
@@ -207,7 +208,7 @@ THREE.OculusRiftEffect = function ( renderer, options ) {
 
 		pCamera.projectionMatrix.copy(right.proj);
 
-		pCamera.matrix.copy(camera.matrix).multiply(right.tranform);
+		pCamera.matrix.copy(movingObject.matrix).multiply(right.tranform);
 		pCamera.matrixWorldNeedsUpdate = true;
 
 		renderer.setViewport(right.viewport[0], right.viewport[1], right.viewport[2], right.viewport[3]);

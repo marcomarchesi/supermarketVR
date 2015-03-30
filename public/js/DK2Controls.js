@@ -16,9 +16,11 @@ Copyright 2014 Lars Ivar Hatledal
    @modified by Pierfrancesco Soffritti
 */
 
-THREE.DK2Controls = function(camera) {
+var lastNotCollidingPositionX = 0, lastNotCollidingPositionZ = 0;
 
-  this.camera = camera;
+THREE.DK2Controls = function(object) {
+
+  this.object = object;
   this.ws;
   this.sensorData;
   this.lastId = -1;
@@ -139,14 +141,17 @@ THREE.DK2Controls = function(camera) {
       var id = this.sensorData[0];
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
-        this.headQuat.set(this.sensorData[4], this.sensorData[5]+this.lookSpeed, this.sensorData[6], this.sensorData[7]);
+        this.headQuat.set(this.sensorData[4], this.sensorData[5], this.sensorData[6], this.sensorData[7]);
 
-        console.log(this.sensorData[5]);  //Axis of interest?
+        //console.log(this.sensorData[5]);  //Axis of interest?
 
-        this.camera.setRotationFromQuaternion(this.headQuat);
+        this.object.setRotationFromQuaternion(this.headQuat);
+        camera.setRotationFromQuaternion(this.headQuat);
 
-        this.controller.setRotationFromMatrix(this.camera.matrix);        
+        this.controller.setRotationFromMatrix(this.object.matrix);
       }
+
+
 
       this.lastId = id;
     }
@@ -172,19 +177,29 @@ THREE.DK2Controls = function(camera) {
 
      //UNDER TEST
       // this.camera.rotation.y = -this.lookSpeed;
-      //console.log("look speed is " + this.lookSpeed);
-    
-    this.camera.position.addVectors(this.controller.position,this.camera.rotation, this.headPos);
+      //console.log("look speed is " + this.lookSpeed);   
 
-    if (this.camera.position.y < -10) {
-        this.camera.position.y = -10;
-      }
+    // both camera and object (camera's bounding box) need to be updated
+    this.object.position.addVectors(this.controller.position, this.headPos);
+    // this.object.position.x = this.controller.position.x;
+    // this.object.position.y = this.controller.position.y;
+    // this.object.position.z = this.controller.position.z;
+    //camera.position.x = this.controller.position.x;
+    //camera.position.y = this.controller.position.y;
+    //camera.position.z = this.controller.position.z;
+    camera.position.addVectors(this.controller.position, this.headPos);
+    
+    handleCollisions(this.object, this.controller);
+
+    //if (this.object.position.y < -10) {
+    //   this.object.position.y = -10;
+    // }
 
       if (ws) {
         if (ws.readyState === 1) {
           ws.send("get\n");
         }
-      } 
+      }
   };
   
   window.addEventListener( 'keydown', bind( this, this.onKeyDown ), false );
@@ -199,5 +214,46 @@ THREE.DK2Controls = function(camera) {
     };
 
   };
+
+  var colliding = false;
+
+  function handleCollisions(movingObject, controller) {
+    
+    // collision detection:
+    //   determines if any of the rays from the cube's origin to each vertex
+    //   intersects any face of a mesh in the array of target meshes
+    //   for increased collision accuracy, add more vertices to the cube;
+    //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+    
+    actualPosition = controller.position.clone();
+    var objectsArray = new Array();
+    objectsArray.push(boundingBoxMesh);
+    
+    for (var vertexIndex = 0; vertexIndex < movingObject.geometry.vertices.length; vertexIndex++) {   
+      var localVertex = movingObject.geometry.vertices[vertexIndex].clone();
+      var globalVertex = localVertex.applyMatrix4( movingObject.matrix );
+      var directionVector = globalVertex.sub( controller.position );
+      
+      var ray = new THREE.Raycaster( actualPosition, directionVector.clone().normalize() );
+      var collisionResults = ray.intersectObjects( objectsArray );
+      
+      // If the distance to an intersection is less than the distance between the Player's position and the geometry's vertex,
+      // then the collision occurred on the interior of the player's mesh -- what we would probably call an "actual" collision.
+      if ( (collisionResults.length > 0) && (collisionResults[0].distance < directionVector.length()) ) {
+        // collision detected
+        console.log("collision");
+        // restore position
+        controller.position.x = lastNotCollidingPositionX;
+        controller.position.z = lastNotCollidingPositionZ;
+
+        // console.log("last not colligind pos: " +lastNotCollidingPositionX +"actual pos: " +controller.position.x );
+      } else if ((collisionResults.length > 0) && (collisionResults[0].distance > directionVector.length())) {
+        // no collision detected -> save position
+        lastNotCollidingPositionX = controller.position.x;
+        lastNotCollidingPositionZ = controller.position.z;
+        // console.log("last not colligind pos: " +lastNotCollidingPositionX);
+      }
+    }
+  }
   
 };
