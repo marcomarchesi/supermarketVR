@@ -208,7 +208,7 @@
               controls.wasd.up = true;
 
             walkingFactor = data.pitch/2;
-            controls.lookSpeed = data.yaw/400;
+            controls.lookSpeed += data.yaw/400;
           }else{
             if(!oculusEnabled)
               controls.moveForward = false ;
@@ -216,7 +216,7 @@
               controls.wasd.up = false;
 
             walkingFactor = 0;
-            controls.lookSpeed = data.yaw/100;
+            controls.lookSpeed += data.yaw/10;
           }
 
           console.log(controls.lookSpeed);

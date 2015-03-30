@@ -139,10 +139,22 @@ THREE.DK2Controls = function(camera) {
       var id = this.sensorData[0];
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
-        this.headQuat.set(this.sensorData[4], this.sensorData[5]+ this.lookSpeed, this.sensorData[6], this.sensorData[7]);
+        this.headQuat.set(this.sensorData[4], this.sensorData[5], this.sensorData[6], this.sensorData[7]);
 
-        this.camera.setRotationFromQuaternion(this.headQuat);
-        this.controller.setRotationFromMatrix(this.camera.matrix);        
+        // this.lookSpeed += delta/3;
+        var gloveQuaternion = new THREE.Quaternion();
+
+        // commented the line below
+        // this.camera.setRotationFromQuaternion(this.headQuat);
+
+        /* combine head rotations and glove rotations */
+        gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
+        var finalQuaternion = new THREE.Quaternion();
+        finalQuaternion.multiplyQuaternions(gloveQuaternion,this.headQuat);
+
+        /* transform camera and controller rotations */
+        this.camera.setRotationFromQuaternion(finalQuaternion);
+        this.controller.setRotationFromMatrix(this.camera.matrix);  
       }
 
       this.lastId = id;
@@ -151,7 +163,8 @@ THREE.DK2Controls = function(camera) {
     // update position TODO here for rotate the cart ???
     if (this.wasd.up){
       this.controller.translateZ(-this.translationSpeed * delta * walkingFactor);
-      // this.controller.rotateOnAxis(new THREE.Vector3(0,1,0),10);
+      
+      // this.camera.rotation.y += this.lookSpeed;
       // this.controller.rotation.y += this.lookSpeed;
     }
     if (this.wasd.down)
@@ -170,6 +183,7 @@ THREE.DK2Controls = function(camera) {
 
      //UNDER TEST
       // this.camera.rotation.y += -this.lookSpeed;
+      // this.controller.rotateOnAxis(new THREE.Vector3(0,1,0),-this.lookSpeed);
     
     this.camera.position.addVectors(this.controller.position, this.headPos);
 
