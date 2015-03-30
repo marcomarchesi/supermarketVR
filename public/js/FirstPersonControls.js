@@ -34,7 +34,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	this.autoSpeedFactor = 0.0;
 
-	this.mouseX = 0;
+	this.mouseX = 1;
 	this.mouseY = 0;
 
 	this.lat = 0;
@@ -122,23 +122,23 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	// };
 
-	this.onMouseMove = function ( event ) {
+	// this.onMouseMove = function ( event ) {
 
-		if(!pause) {
+	// 	if(!pause) {
 			
-			if ( this.domElement === document ) {
+	// 		if ( this.domElement === document ) {
 
-				this.mouseX = event.pageX - this.viewHalfX;
-				this.mouseY = event.pageY - this.viewHalfY;
+	// 			this.mouseX = event.pageX - this.viewHalfX;
+	// 			this.mouseY = event.pageY - this.viewHalfY;
 
-			} else {
+	// 		} else {
 
-				this.mouseX = event.pageX - this.domElement.offsetLeft - this.viewHalfX;
-				this.mouseY = event.pageY - this.domElement.offsetTop - this.viewHalfY;
+	// 			this.mouseX = event.pageX - this.domElement.offsetLeft - this.viewHalfX;
+	// 			this.mouseY = event.pageY - this.domElement.offsetTop - this.viewHalfY;
 
-			}
-		}
-	};
+	// 		}
+	// 	}
+	// };
 
 	this.onKeyDown = function ( event ) {
 
@@ -200,12 +200,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 			}
 
-			var actualMoveSpeed;
-			// if(!running)
-			// 	actualMoveSpeed = delta * this.movementSpeed*;
-			// else
-				actualMoveSpeed = delta * this.movementSpeed * walkingFactor;
-				//console.log(actualMoveSpeed);
+			var actualMoveSpeed = delta * this.movementSpeed * walkingFactor;
 
 
 			if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) this.object.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
@@ -263,7 +258,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-	this.domElement.addEventListener( 'mousemove', bind( this, this.onMouseMove ), false );
+	// this.domElement.addEventListener( 'mousemove', bind( this, this.onMouseMove ), false );
 	// this.domElement.addEventListener( 'mousedown', bind( this, this.onMouseDown ), false );
 	// this.domElement.addEventListener( 'mouseup', bind( this, this.onMouseUp ), false );
 

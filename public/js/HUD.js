@@ -112,6 +112,13 @@ function HUD(HUDScene, HUDisVisible, oculusEnabled) {
   textMesh.position.z = -0.01;
   HUDscene.add(textMesh);
 
+    // add a cube
+  var geometry = new THREE.BoxGeometry( 13, 13, 13 );
+  var material = new THREE.MeshBasicMaterial();
+  mesh = new THREE.Mesh( geometry, material );
+  mesh.position.z = -0.01;
+  HUDscene.add( mesh );
+
   // ---
 
   HUDElementsArray = [hudMinimapMesh, pointerMesh, redPointerMesh, LapCounterMesh];

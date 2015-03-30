@@ -24,9 +24,10 @@
     <script type="text/javascript" src="js/HUD.js"></script>
     <script src="js/socket.io.js"></script>
 
+
     <script type="text/javascript">
 
-      var socket = io.connect('http://localhost:8080');
+      //var socket = io.connect('http://localhost:8080');
 
       //Global variables.
 
@@ -35,13 +36,11 @@
 
       var ARTIFICIAL_LIGHT = 0xffffff;
 
-      var textContainer;
-
       var scene, renderer, controls;
       var camera;
       var HUDscene, HUDcamera;
 
-      var oculusEnabled = false;
+      var oculusEnabled = true;
 
       // scene scale
       var sceneX, sceneZ;
@@ -55,7 +54,7 @@
       // game state
       var pause = false;
 
-      var scene_mesh, boundingBoxMesh;
+      var scene_mesh, boundingBoxMesh, cart_mesh, mesh;
       var light;
       var ambientLightColor = ARTIFICIAL_LIGHT;
 
@@ -65,6 +64,7 @@
       var delta;
 
       var walkingFactor = 1;
+      var MOVE_FACTOR = 2;
 
       var cube;
 
@@ -73,7 +73,6 @@
       var rdy = false;
 
       var previousPosition, actualPosition;
-
 
       function init() {
 
@@ -160,9 +159,10 @@
       camera.position.z = 0;
 
       // add a random cube to the scene
-      var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
+      var cubeGeometry = new THREE.CubeGeometry(2, 2, 2);
       var cubeMaterial = new THREE.MeshLambertMaterial({ color: "red" });
-      cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+      cube = new THREE.Mesh(cubeGeometry, wireMaterial);
       cube.castShadow = true;
       cube.position.x = 0;
       cube.position.y = 0;
@@ -170,8 +170,10 @@
 
       actualPosition = cube.position.clone();
 
-      cube.add(camera);
+      // not sure if useful .... yet
+      //cube.add(camera);
       scene.add(cube);
+      
       
       // --- hud
       // create a scene that will hold all hud elements and an ortho camera to always show them on top of the game scene
@@ -203,26 +205,27 @@
       addStats();
 
       /* web socket */
-      socket.on('message',function(data){  
-
-          //TODO test more
-          if(data.yaw > 5)
-            data.yaw = 5;
-          if(data.yaw <-5)
-            data.yaw = -5;
-          /****************/
-
-          if (data.pitch>0.5) {
+      /*
+      socket.on('message',function(data){
+        if (data.pitch>0.7) {
+          if(!oculusEnabled)
             controls.moveForward = true ;
-            walkingFactor = data.pitch/1.5;
-            controls.lookSpeed = degreesToRadians(data.yaw*1.5);
-          } else{
-            controls.moveForward = false;
-            walkingFactor = 0;
-            controls.lookSpeed = degreesToRadians(data.yaw*4);
-          }
-          console.log(data.yaw);
+          else
+            controls.wasd.up = true;
+
+          walkingFactor = data.pitch/2;
+          controls.lookSpeed = data.yaw/50;
+        } else {
+          if(!oculusEnabled)
+            controls.moveForward = false ;
+          else
+            controls.wasd.up = false;
+
+          walkingFactor = 0;
+          controls.lookSpeed = data.yaw;
+        }
       });
+      */
 
       // add the output of the renderer to the html element
       content.appendChild(renderer.domElement);
@@ -249,12 +252,22 @@
     
     function render(dt) {
       if(rdy) {
-        delta = clock.getDelta();
+        // camera.updateProjectionMatrix();
 
-        //lock the camera to height = 2
-        cube.position.y = 1;
-        camera.position.y = 1;
+        delta = clock.getDelta();
+        controls.update(delta/MOVE_FACTOR);
+
+        //lock the camera to height = 5
+        camera.position.y = 5;
+        cube.position.y = 5;
         // ---
+
+        // //bind a cube in front of the camera NOT WORKING YET
+        // var zCamVec = new THREE.Vector3(0,4,-5);
+        // var pos = camera.localToWorld(zCamVec);
+        // mesh.position.set(pos.x, pos.y, pos.z);
+        // // mesh.lookAt(camera.position);
+
 
         // update HUD
         HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
@@ -262,7 +275,7 @@
         // update
         renderer.autoClear = false;
         if(oculusEnabled == true) {
-          oculusRenderer.render( scene, cube, HUDscene);
+          oculusRenderer.render( scene, camera, HUDscene);
         }
         else {
           // if we just switched to the normal renderer from the oculusRenderer, we have to reset the render area size
@@ -272,12 +285,9 @@
           renderer.render(scene, camera);
           renderer.render(HUDscene, HUDcamera);
         }
-
-        controls.update(delta);
-        stats.update();     
+        stats.update();
       }
-
-      requestAnimationFrame( render ); 
+      requestAnimationFrame( render );
     }
 
     function addStats() {
@@ -291,13 +301,15 @@
 
     //load the scene
     function loadScene() {
-      loader.load("./models/market.js",
+      loader.load("./models/market2.js",
       function(model, materials) {
-        scene_mesh = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials )); // the mass is 0
+        scene_mesh = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ));
         scene_mesh.name = 'scene';
+        scene_mesh.scale.x = 10;
+        scene_mesh.scale.y = 10;
+        scene_mesh.scale.z = 10; 
         scene_mesh.receiveShadow = true;
         scene_mesh.castShadow = true;
-        //scene.add(scene_mesh);
 
         // i'm getting the scale factor here because 'scene_mesh' is loaded asynchronously
         getSceneAndMapDimesion(scene_mesh);          
@@ -309,11 +321,28 @@
         boundingBoxMesh.name = 'boundingBoxMesh';
         boundingBoxMesh.receiveShadow = true;
         boundingBoxMesh.castShadow = true;
+        boundingBoxMesh.scale.x = 10;
+        boundingBoxMesh.scale.y = 10;
+        boundingBoxMesh.scale.z = 10; 
         scene.add(boundingBoxMesh);        
 
         rdy = true;
       });
 
+
+      loader.load("./models/cart.js",
+      function(model, materials) {
+        cart_mesh  = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); 
+        cart_mesh.name = 'cart';
+        cart_mesh.scale.x = 1;
+        cart_mesh.scale.y = 1;
+        cart_mesh.scale.z = 1;
+        cart_mesh.receiveShadow = true;
+        cart_mesh.castShadow = true;
+        cart_mesh.position.y = 2.5;
+        cart_mesh.position.set( 0, 0, - 3);
+        scene.add(cart_mesh); 
+      });
     }
 
     function getSceneAndMapDimesion(scene_mesh) {
@@ -330,6 +359,9 @@
 
       console.log("scene size: " +sceneX +" x " +sceneZ);
       console.log("minimap size: " +mapX +" x " +mapY);
+
+      scene.add(scene_mesh);
+        // // i'm getting the scale factor here because 'scene_mesh' is loaded asynchronously
     }
     
     /**

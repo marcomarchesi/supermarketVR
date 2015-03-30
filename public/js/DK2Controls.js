@@ -38,6 +38,7 @@ THREE.DK2Controls = function(object) {
   this.headQuat = new THREE.Quaternion();
   
   this.translationSpeed  = 5;
+  this.lookSpeed = 0;
   
   this.wasd = {
     left: false,
@@ -90,13 +91,13 @@ THREE.DK2Controls = function(object) {
             this.wasd.left = true;
             break;
 
-        case 82: /*R*/
-            this.moveUp = true; 
-            break;
+        // case 82: /*R*/
+        //     this.moveUp = true; 
+        //     break;
 
-        case 70: /*F*/
-            this.moveDown = true;
-            break;
+        // case 70: /*F*/
+        //     this.moveDown = true;
+        //     break;
       }
 
     }
@@ -123,13 +124,13 @@ THREE.DK2Controls = function(object) {
           this.wasd.left = false;
           break;
 
-      case 82: /*R*/
-          this.moveUp = false; 
-          break;
+      // case 82: /*R*/
+      //     this.moveUp = false; 
+      //     break;
 
-      case 70: /*F*/
-          this.moveDown = false;
-          break;
+      // case 70: /*F*/
+      //     this.moveDown = false;
+      //     break;
     }
   };
 
@@ -141,18 +142,24 @@ THREE.DK2Controls = function(object) {
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
         this.headQuat.set(this.sensorData[4], this.sensorData[5], this.sensorData[6], this.sensorData[7]);
-        
+
+        //console.log(this.sensorData[5]);  //Axis of interest?
 
         this.object.setRotationFromQuaternion(this.headQuat);
-        this.controller.setRotationFromMatrix(this.object.matrix);        
+        camera.setRotationFromQuaternion(this.headQuat);
+
+        this.controller.setRotationFromMatrix(this.object.matrix);
       }
+
+
 
       this.lastId = id;
     }
 
-    // update position
-    if (this.wasd.up)
-      this.controller.translateZ(-this.translationSpeed * delta*walkingFactor);
+    // update position TODO here for rotate the cart ???
+    if (this.wasd.up){
+      this.controller.translateZ(-this.translationSpeed * delta * walkingFactor);
+    }
 
     if (this.wasd.down)
       this.controller.translateZ(this.translationSpeed * delta);
@@ -167,8 +174,22 @@ THREE.DK2Controls = function(object) {
       this.controller.translateY( this.translationSpeed * delta );
     if (this.moveDown)
       this.controller.translateY( - this.translationSpeed * delta );
-    
+
+     //UNDER TEST
+      // this.camera.rotation.y = -this.lookSpeed;
+      //console.log("look speed is " + this.lookSpeed);   
+
+    // both camera and object (camera's bounding box) need to be updated
     this.object.position.addVectors(this.controller.position, this.headPos);
+    // this.object.position.x = this.controller.position.x;
+    // this.object.position.y = this.controller.position.y;
+    // this.object.position.z = this.controller.position.z;
+    //camera.position.x = this.controller.position.x;
+    //camera.position.y = this.controller.position.y;
+    //camera.position.z = this.controller.position.z;
+    camera.position.addVectors(this.controller.position, this.headPos);
+    
+    handleCollisions(this.object, this.controller);
 
     //if (this.object.position.y < -10) {
     //   this.object.position.y = -10;
@@ -178,9 +199,7 @@ THREE.DK2Controls = function(object) {
         if (ws.readyState === 1) {
           ws.send("get\n");
         }
-      } 
-
-      handleCollisions(this.object, this.controller)
+      }
   };
   
   window.addEventListener( 'keydown', bind( this, this.onKeyDown ), false );
@@ -196,18 +215,19 @@ THREE.DK2Controls = function(object) {
 
   };
 
+  var colliding = false;
+
   function handleCollisions(movingObject, controller) {
+    
     // collision detection:
     //   determines if any of the rays from the cube's origin to each vertex
     //   intersects any face of a mesh in the array of target meshes
     //   for increased collision accuracy, add more vertices to the cube;
-    //   for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
     //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
     
     actualPosition = controller.position.clone();
     var objectsArray = new Array();
     objectsArray.push(boundingBoxMesh);
-    //clearText();
     
     for (var vertexIndex = 0; vertexIndex < movingObject.geometry.vertices.length; vertexIndex++) {   
       var localVertex = movingObject.geometry.vertices[vertexIndex].clone();
@@ -217,21 +237,22 @@ THREE.DK2Controls = function(object) {
       var ray = new THREE.Raycaster( actualPosition, directionVector.clone().normalize() );
       var collisionResults = ray.intersectObjects( objectsArray );
       
-      if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+      // If the distance to an intersection is less than the distance between the Player's position and the geometry's vertex,
+      // then the collision occurred on the interior of the player's mesh -- what we would probably call an "actual" collision.
+      if ( (collisionResults.length > 0) && (collisionResults[0].distance < directionVector.length()) ) {
         // collision detected
         console.log("collision");
+        // restore position
         controller.position.x = lastNotCollidingPositionX;
         controller.position.z = lastNotCollidingPositionZ;
 
-        actualPosition = previousPosition;
-      } else {
+        // console.log("last not colligind pos: " +lastNotCollidingPositionX +"actual pos: " +controller.position.x );
+      } else if ((collisionResults.length > 0) && (collisionResults[0].distance > directionVector.length())) {
+        // no collision detected -> save position
         lastNotCollidingPositionX = controller.position.x;
         lastNotCollidingPositionZ = controller.position.z;
+        // console.log("last not colligind pos: " +lastNotCollidingPositionX);
       }
-
-      //console.log("obj: " +movingObject.position.x, movingObject.position.y, movingObject.position.z)
-      //console.log("cnt: " +controller.position.x, controller.position.y, controller.position.z)
-
     }
   }
   
