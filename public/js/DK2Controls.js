@@ -139,12 +139,9 @@ THREE.DK2Controls = function(camera) {
       var id = this.sensorData[0];
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
-        this.headQuat.set(this.sensorData[4], this.sensorData[5]+this.lookSpeed, this.sensorData[6], this.sensorData[7]);
-
-        console.log(this.sensorData[5]);  //Axis of interest?
+        this.headQuat.set(this.sensorData[4], this.sensorData[5]+ this.lookSpeed, this.sensorData[6], this.sensorData[7]);
 
         this.camera.setRotationFromQuaternion(this.headQuat);
-
         this.controller.setRotationFromMatrix(this.camera.matrix);        
       }
 
@@ -154,8 +151,9 @@ THREE.DK2Controls = function(camera) {
     // update position TODO here for rotate the cart ???
     if (this.wasd.up){
       this.controller.translateZ(-this.translationSpeed * delta * walkingFactor);
+      // this.controller.rotateOnAxis(new THREE.Vector3(0,1,0),10);
+      // this.controller.rotation.y += this.lookSpeed;
     }
-
     if (this.wasd.down)
       this.controller.translateZ(this.translationSpeed * delta);
 
@@ -166,15 +164,14 @@ THREE.DK2Controls = function(camera) {
       this.controller.translateX(-this.translationSpeed * delta);
 
     if (  this.moveUp)
-      this.controller.translateY( this.translationSpeed * delta );
+      this.controller.translateY( this.translationSpeed * delta);
     if (this.moveDown)
-      this.controller.translateY( - this.translationSpeed * delta );
+      this.controller.translateY( - this.translationSpeed * delta);
 
      //UNDER TEST
-      // this.camera.rotation.y = -this.lookSpeed;
-      //console.log("look speed is " + this.lookSpeed);
+      // this.camera.rotation.y += -this.lookSpeed;
     
-    this.camera.position.addVectors(this.controller.position,this.camera.rotation, this.headPos);
+    this.camera.position.addVectors(this.controller.position, this.headPos);
 
     if (this.camera.position.y < -10) {
         this.camera.position.y = -10;

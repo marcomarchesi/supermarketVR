@@ -25,7 +25,10 @@
     <script src="js/socket.io.js"></script>
     <script type="text/javascript">
 
-      var socket = io.connect('http://localhost:8080');
+      var socket = io.connect('http://localhost:8001');
+      var roll,pitch,yaw;
+      var raw = {};
+      var stepCount = 0;
 
       //Global variables.
 
@@ -186,8 +189,17 @@
       // add fps stats
       addStats();
 
-      /* web socket */
-      socket.on('message',function(data){  
+      // add the output of the renderer to the html element
+      content.appendChild(renderer.domElement);
+
+      // call the render function, after the first render, interval is determined by requestAnimationFrame
+      render(0.016);
+    }
+
+    /* web socket */
+      socket.on('data',function(data){  
+
+        
 
           if (data.pitch>0.7){
             if(!oculusEnabled)
@@ -196,7 +208,7 @@
               controls.wasd.up = true;
 
             walkingFactor = data.pitch/2;
-            controls.lookSpeed = data.yaw/50;
+            controls.lookSpeed = data.yaw/400;
           }else{
             if(!oculusEnabled)
               controls.moveForward = false ;
@@ -204,16 +216,11 @@
               controls.wasd.up = false;
 
             walkingFactor = 0;
-            controls.lookSpeed = data.yaw;
+            controls.lookSpeed = data.yaw/100;
           }
+
+          console.log(controls.lookSpeed);
       });
-
-      // add the output of the renderer to the html element
-      content.appendChild(renderer.domElement);
-
-      // call the render function, after the first render, interval is determined by requestAnimationFrame
-      render(0.016);
-    }
 
     function setControls() {
       // Oculus DK2 controls
@@ -282,7 +289,7 @@
 
     //load the scene
     function loadScene() {
-      loader.load("./models/market2.js",
+      loader.load("./models/market.js",
       function(model, materials) {
         scene_mesh  = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); // the mass is 0
         scene_mesh.name = 'scene';
