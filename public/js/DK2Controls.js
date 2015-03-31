@@ -199,7 +199,7 @@ THREE.DK2Controls = function(object) {
     //camera.position.z = this.controller.position.z;
     camera.position.addVectors(this.controller.position, this.headPos);
     
-    handleCollisions(this.object, this.controller);
+    // handleCollisions(this.object, this.controller);
 
     //if (this.object.position.y < -10) {
     //   this.object.position.y = -10;

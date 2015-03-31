@@ -77,7 +77,7 @@
 
       var stats;
 
-      var rdy = false;
+      var rdy = true; //false with collisions
 
       var previousPosition, actualPosition;
 
@@ -247,7 +247,7 @@
     function setControls() {
       // Oculus DK2 controls
       //if(oculusEnabled == true)
-        controls = new THREE.DK2Controls(cube);
+        controls = new THREE.DK2Controls(camera);
       //else {
       //  controls = new THREE.FirstPersonControls(cube);
       //  controls.movementSpeed = 2;
@@ -325,19 +325,19 @@
         getSceneAndMapDimesion(scene_mesh);          
       });
 
-      loader.load("./models/market_bb.js",
-      function(model, materials) {
-        boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue" })); 
-        boundingBoxMesh.name = 'boundingBoxMesh';
-        boundingBoxMesh.receiveShadow = true;
-        boundingBoxMesh.castShadow = true;
-        boundingBoxMesh.scale.x = 10;
-        boundingBoxMesh.scale.y = 10;
-        boundingBoxMesh.scale.z = 10; 
-        scene.add(boundingBoxMesh);        
+      // loader.load("./models/market_bb.js",
+      // function(model, materials) {
+      //   boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue" })); 
+      //   boundingBoxMesh.name = 'boundingBoxMesh';
+      //   boundingBoxMesh.receiveShadow = true;
+      //   boundingBoxMesh.castShadow = true;
+      //   boundingBoxMesh.scale.x = 10;
+      //   boundingBoxMesh.scale.y = 10;
+      //   boundingBoxMesh.scale.z = 10; 
+      //   scene.add(boundingBoxMesh);        
 
-        rdy = true;
-      });
+      //   rdy = true;
+      // });
 
 
       loader.load("./models/cart.js",
