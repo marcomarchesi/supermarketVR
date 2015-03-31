@@ -146,6 +146,8 @@ THREE.DK2Controls = function(object) {
         //console.log(this.sensorData[5]);  //Axis of interest?
 
         this.object.setRotationFromQuaternion(this.headQuat);
+
+        // collisions, camera and oject are (at the moment) two separate objects
         camera.setRotationFromQuaternion(this.headQuat);
 
         this.controller.setRotationFromMatrix(this.object.matrix);
@@ -181,19 +183,17 @@ THREE.DK2Controls = function(object) {
 
     // both camera and object (camera's bounding box) need to be updated
     this.object.position.addVectors(this.controller.position, this.headPos);
-    // this.object.position.x = this.controller.position.x;
-    // this.object.position.y = this.controller.position.y;
-    // this.object.position.z = this.controller.position.z;
-    //camera.position.x = this.controller.position.x;
-    //camera.position.y = this.controller.position.y;
-    //camera.position.z = this.controller.position.z;
+    // collisions, camera and oject are (at the moment) two separate objects
     camera.position.addVectors(this.controller.position, this.headPos);
     
-    handleCollisions(this.object, this.controller);
+    handleCollisions(this.object, this.controller, this.wasd.right, this.wasd.left, this.wasd.up, this.wasd.down);
 
     //if (this.object.position.y < -10) {
     //   this.object.position.y = -10;
     // }
+
+    console.log("controller: " +this.controller.position.x +", " +this.controller.position.y  +", " +this.controller.position.z);
+    console.log("object    : " +this.object.position.x +", " +this.object.position.y +", " +this.object.position.z);
 
       if (ws) {
         if (ws.readyState === 1) {
@@ -217,7 +217,7 @@ THREE.DK2Controls = function(object) {
 
   var colliding = false;
 
-  function handleCollisions(movingObject, controller) {
+  function handleCollisions(movingObject, controller, right, left, up, down) {
     
     // collision detection:
     //   determines if any of the rays from the cube's origin to each vertex
@@ -225,14 +225,14 @@ THREE.DK2Controls = function(object) {
     //   for increased collision accuracy, add more vertices to the cube;
     //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
     
-    actualPosition = controller.position.clone();
+    actualPosition = movingObject.position.clone();
     var objectsArray = new Array();
     objectsArray.push(boundingBoxMesh);
     
     for (var vertexIndex = 0; vertexIndex < movingObject.geometry.vertices.length; vertexIndex++) {   
       var localVertex = movingObject.geometry.vertices[vertexIndex].clone();
       var globalVertex = localVertex.applyMatrix4( movingObject.matrix );
-      var directionVector = globalVertex.sub( controller.position );
+      var directionVector = globalVertex.sub( movingObject.position );
       
       var ray = new THREE.Raycaster( actualPosition, directionVector.clone().normalize() );
       var collisionResults = ray.intersectObjects( objectsArray );
@@ -246,11 +246,20 @@ THREE.DK2Controls = function(object) {
         controller.position.x = lastNotCollidingPositionX;
         controller.position.z = lastNotCollidingPositionZ;
 
+        // movingObject.position.x = lastNotCollidingPositionX;
+        // movingObject.position.z = lastNotCollidingPositionZ;
+
         // console.log("last not colligind pos: " +lastNotCollidingPositionX +"actual pos: " +controller.position.x );
       } else if ((collisionResults.length > 0) && (collisionResults[0].distance > directionVector.length())) {
         // no collision detected -> save position
-        lastNotCollidingPositionX = controller.position.x;
-        lastNotCollidingPositionZ = controller.position.z;
+        if(left)
+          lastNotCollidingPositionX = controller.position.x+0.04;
+        if(right)
+          lastNotCollidingPositionX = controller.position.x-0.01;
+        if(up)
+          lastNotCollidingPositionZ = controller.position.z;
+        if(down)
+          lastNotCollidingPositionZ = controller.position.z;
         // console.log("last not colligind pos: " +lastNotCollidingPositionX);
       }
     }

@@ -27,7 +27,14 @@
 
     <script type="text/javascript">
 
-      //var socket = io.connect('http://localhost:8080');
+// <<<<<<< HEAD
+      var socket = io.connect('http://localhost:8001');
+      var roll,pitch,yaw;
+      var raw = {};
+      var stepCount = 0;
+// =======
+//       //var socket = io.connect('http://localhost:8080');
+// >>>>>>> master
 
       //Global variables.
 
@@ -204,35 +211,38 @@
       // add fps stats
       addStats();
 
-      /* web socket */
-      /*
-      socket.on('message',function(data){
-        if (data.pitch>0.7) {
-          if(!oculusEnabled)
-            controls.moveForward = true ;
-          else
-            controls.wasd.up = true;
-
-          walkingFactor = data.pitch/2;
-          controls.lookSpeed = data.yaw/50;
-        } else {
-          if(!oculusEnabled)
-            controls.moveForward = false ;
-          else
-            controls.wasd.up = false;
-
-          walkingFactor = 0;
-          controls.lookSpeed = data.yaw;
-        }
-      });
-      */
-
       // add the output of the renderer to the html element
       content.appendChild(renderer.domElement);
 
       // call the render function, after the first render, interval is determined by requestAnimationFrame
       render(0.016);
     }
+
+    /* web socket */
+      socket.on('data',function(data){  
+
+        
+
+          if (data.pitch>0.7){
+            if(!oculusEnabled)
+              controls.moveForward = true ;
+            else
+              controls.wasd.up = true;
+
+            walkingFactor = data.pitch/2;
+            controls.lookSpeed += data.yaw/400;
+          }else{
+            if(!oculusEnabled)
+              controls.moveForward = false ;
+            else
+              controls.wasd.up = false;
+
+            walkingFactor = 0;
+            controls.lookSpeed += data.yaw/10;
+          }
+
+          console.log(controls.lookSpeed);
+      });
 
     function setControls() {
       // Oculus DK2 controls
@@ -301,7 +311,7 @@
 
     //load the scene
     function loadScene() {
-      loader.load("./models/market2.js",
+      loader.load("./models/market.js",
       function(model, materials) {
         scene_mesh = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ));
         scene_mesh.name = 'scene';
