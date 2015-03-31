@@ -27,14 +27,14 @@
 
     <script type="text/javascript">
 
-<<<<<<< HEAD
+// <<<<<<< HEAD
       var socket = io.connect('http://localhost:8001');
       var roll,pitch,yaw;
       var raw = {};
       var stepCount = 0;
-=======
-      //var socket = io.connect('http://localhost:8080');
->>>>>>> master
+// =======
+//       //var socket = io.connect('http://localhost:8080');
+// >>>>>>> master
 
       //Global variables.
 
@@ -211,7 +211,6 @@
       // add fps stats
       addStats();
 
-<<<<<<< HEAD
       // add the output of the renderer to the html element
       content.appendChild(renderer.domElement);
 
@@ -241,33 +240,6 @@
             walkingFactor = 0;
             controls.lookSpeed += data.yaw/10;
           }
-=======
-      /* web socket */
-      /*
-      socket.on('message',function(data){
-        if (data.pitch>0.7) {
-          if(!oculusEnabled)
-            controls.moveForward = true ;
-          else
-            controls.wasd.up = true;
-
-          walkingFactor = data.pitch/2;
-          controls.lookSpeed = data.yaw/50;
-        } else {
-          if(!oculusEnabled)
-            controls.moveForward = false ;
-          else
-            controls.wasd.up = false;
-
-          walkingFactor = 0;
-          controls.lookSpeed = data.yaw;
-        }
-      });
-      */
-
-      // add the output of the renderer to the html element
-      content.appendChild(renderer.domElement);
->>>>>>> master
 
           console.log(controls.lookSpeed);
       });

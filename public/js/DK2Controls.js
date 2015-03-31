@@ -13,7 +13,8 @@ Copyright 2014 Lars Ivar Hatledal
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   @modified by Pierfrancesco Soffritti
+   @modified by Pierfrancesco Soffritti (collision detection)
+   @modified by Marco Marchesi (quaternions operations)
 */
 
 var lastNotCollidingPositionX = 0, lastNotCollidingPositionZ = 0;
@@ -143,8 +144,6 @@ THREE.DK2Controls = function(object) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
         this.headQuat.set(this.sensorData[4], this.sensorData[5], this.sensorData[6], this.sensorData[7]);
 
-<<<<<<< HEAD
-        // this.lookSpeed += delta/3;
         var gloveQuaternion = new THREE.Quaternion();
 
         // commented the line below
@@ -156,16 +155,8 @@ THREE.DK2Controls = function(object) {
         finalQuaternion.multiplyQuaternions(gloveQuaternion,this.headQuat);
 
         /* transform camera and controller rotations */
-        this.camera.setRotationFromQuaternion(finalQuaternion);
-        this.controller.setRotationFromMatrix(this.camera.matrix);  
-=======
-        //console.log(this.sensorData[5]);  //Axis of interest?
-
-        this.object.setRotationFromQuaternion(this.headQuat);
-        camera.setRotationFromQuaternion(this.headQuat);
-
-        this.controller.setRotationFromMatrix(this.object.matrix);
->>>>>>> master
+        this.object.setRotationFromQuaternion(finalQuaternion);
+        this.controller.setRotationFromMatrix(this.object.matrix);  
       }
 
 
@@ -195,12 +186,6 @@ THREE.DK2Controls = function(object) {
       this.controller.translateY( - this.translationSpeed * delta);
 
      //UNDER TEST
-<<<<<<< HEAD
-      // this.camera.rotation.y += -this.lookSpeed;
-      // this.controller.rotateOnAxis(new THREE.Vector3(0,1,0),-this.lookSpeed);
-    
-    this.camera.position.addVectors(this.controller.position, this.headPos);
-=======
       // this.camera.rotation.y = -this.lookSpeed;
       //console.log("look speed is " + this.lookSpeed);   
 
@@ -215,7 +200,6 @@ THREE.DK2Controls = function(object) {
     camera.position.addVectors(this.controller.position, this.headPos);
     
     handleCollisions(this.object, this.controller);
->>>>>>> master
 
     //if (this.object.position.y < -10) {
     //   this.object.position.y = -10;
