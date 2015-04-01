@@ -122,24 +122,35 @@ THREE.DK2Controls = function(object) {
 
   this.update = function(delta) {
 
-    if (this.sensorData) {
+   /* OCULUS ON */
+    if (this.sensorData) { 
       var id = this.sensorData[0];
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
         this.headQuat.set(this.sensorData[4], this.sensorData[5], this.sensorData[6], this.sensorData[7]);
+        
+        var gloveQuaternion = new THREE.Quaternion();
+        // commented the line below
+        // this.camera.setRotationFromQuaternion(this.headQuat);
+        /* combine head rotations and glove rotations */
+        gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
+        var finalQuaternion = new THREE.Quaternion();
+        finalQuaternion.multiplyQuaternions(gloveQuaternion,this.headQuat);
 
-        //console.log(this.sensorData[5]);  //Axis of interest?
-
-        this.object.setRotationFromQuaternion(this.headQuat);
-
-        // collisions, camera and oject are (at the moment) two separate objects
-        camera.setRotationFromQuaternion(this.headQuat);
-        //cart_mesh.setRotationFromQuaternion(this.headQuat);
-
-        this.controller.setRotationFromMatrix(this.object.matrix);
+        /* transform camera and controller rotations */
+        this.object.setRotationFromQuaternion(finalQuaternion);
+        this.controller.setRotationFromMatrix(this.object.matrix);  
       }
-
       this.lastId = id;
+    } 
+    /* OCULUS OFF */
+    else {
+
+        var gloveQuaternion = new THREE.Quaternion();
+        gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
+        /* transform camera and controller rotations */
+        this.object.setRotationFromQuaternion(gloveQuaternion);
+        this.controller.setRotationFromMatrix(this.object.matrix);  
     }
 
     // update position TODO here for rotate the cart ???

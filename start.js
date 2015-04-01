@@ -2,7 +2,7 @@
 
 
 var express = require('express');
-var glove = require('./GloveJS/glove_module/lib/glove.js');
+var glove = require('./Glove.js');
 var app = express();
 var port = 8080;
 
