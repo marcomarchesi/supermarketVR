@@ -78,8 +78,7 @@
       var stats;
 
       var rdy = false;
-
-      var previousPosition, actualPosition;
+      var enableCollision = true;
 
       function init() {
 
@@ -270,6 +269,9 @@
         //lock the camera to height = 5
         camera.position.y = 5;
         cube.position.y = 5;
+        cart_mesh.position.y = 3;
+
+        cart_mesh.position.z = cart_mesh.position.z-3;
         // ---
 
         // //bind a cube in front of the camera NOT WORKING YET
@@ -315,9 +317,9 @@
       function(model, materials) {
         scene_mesh = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ));
         scene_mesh.name = 'scene';
-        scene_mesh.scale.x = 10;
-        scene_mesh.scale.y = 10;
-        scene_mesh.scale.z = 10; 
+        scene_mesh.scale.x = 15;
+        scene_mesh.scale.y = 15;
+        scene_mesh.scale.z = 15; 
         scene_mesh.receiveShadow = true;
         scene_mesh.castShadow = true;
 
@@ -327,16 +329,15 @@
 
       loader.load("./models/market_bb.js",
       function(model, materials) {
-        boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue" })); 
+        boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue", transparent: true, opacity: 0.5 })); 
         boundingBoxMesh.name = 'boundingBoxMesh';
         boundingBoxMesh.receiveShadow = true;
         boundingBoxMesh.castShadow = true;
-        boundingBoxMesh.scale.x = 10;
-        boundingBoxMesh.scale.y = 10;
-        boundingBoxMesh.scale.z = 10; 
+        boundingBoxMesh.scale.x = 15;
+        boundingBoxMesh.scale.y = 15;
+        boundingBoxMesh.scale.z = 15; 
         scene.add(boundingBoxMesh);        
 
-        rdy = true;
       });
 
 
@@ -344,14 +345,22 @@
       function(model, materials) {
         cart_mesh  = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); 
         cart_mesh.name = 'cart';
-        cart_mesh.scale.x = 1;
-        cart_mesh.scale.y = 1;
-        cart_mesh.scale.z = 1;
+        cart_mesh.scale.x = 3;
+        cart_mesh.scale.y = 3;
+        cart_mesh.scale.z = 3;
         cart_mesh.receiveShadow = true;
         cart_mesh.castShadow = true;
-        cart_mesh.position.y = 2.5;
-        cart_mesh.position.set( 0, 0, - 3);
+        //cart_mesh.position.y = 2.5;
+        //cart_mesh.position.set( 0, 0, - 3);
+        cart_mesh.position.x = 0;
+        cart_mesh.position.y = 0;
+        cart_mesh.position.z = 0;
+
+        cart_mesh.rotation.y = -Math.PI /2;
+
         scene.add(cart_mesh); 
+
+        rdy = true;
       });
     }
 
