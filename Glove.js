@@ -210,7 +210,6 @@ function sendData(){
       // var yaw_short = degreesToRadians(com_y);
       // yaw = ALPHA * (yaw + (degreesToRadians(gyr_z) * SAMPLE_TIME)) + (1- ALPHA) * yaw_short;
       var yaw_compensation = sign(yaw)*degreesToRadians(SAMPLE_TIME*0.144);
-      var yaw_old = yaw;
       yaw = yaw + (degreesToRadians(gyr_z) * SAMPLE_TIME) + yaw_compensation;
       // yaw = 0;
 

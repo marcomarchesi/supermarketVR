@@ -27,14 +27,10 @@
 
     <script type="text/javascript">
 
-// <<<<<<< HEAD
       var socket = io.connect('http://localhost:8001');
       var roll,pitch,yaw;
       var raw = {};
       var stepCount = 0;
-// =======
-//       //var socket = io.connect('http://localhost:8080');
-// >>>>>>> master
 
       //Global variables.
 
@@ -159,26 +155,26 @@
 
       // create cameras.
       // camera is the normal camera and  will be controlled by FirstPersonControls.js/DK2Controls.js
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 30);
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.001, 30);
       camera.position.x = 0;
-      camera.position.y = 0;
+      camera.position.y = 6;
       camera.position.z = 0;
 
-      // add a random cube to the scene
-      var cubeGeometry = new THREE.CubeGeometry(2, 2, 2);
-      var cubeMaterial = new THREE.MeshLambertMaterial({ color: "red" });
-      var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
-      cube = new THREE.Mesh(cubeGeometry, wireMaterial);
-      cube.castShadow = true;
-      cube.position.x = 0;
-      cube.position.y = 0;
-      cube.position.z = 0;
+      // // add a random cube to the scene
+      // var cubeGeometry = new THREE.CubeGeometry(2, 2, 2);
+      // var cubeMaterial = new THREE.MeshLambertMaterial({ color: "red" });
+      // var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+      // cube = new THREE.Mesh(cubeGeometry, wireMaterial);
+      // cube.castShadow = true;
+      // cube.position.x = 0;
+      // cube.position.y = 0;
+      // cube.position.z = 0;
 
-      actualPosition = cube.position.clone();
+      // actualPosition = cube.position.clone();
 
       // not sure if useful .... yet
-      cube.add(camera);
-      scene.add(cube);
+      // cube.add(camera);
+      scene.add(camera);
       
       
       // --- hud
@@ -245,14 +241,7 @@
 
     function setControls() {
       // Oculus DK2 controls
-      //if(oculusEnabled == true)
-        controls = new THREE.DK2Controls(cube);
-      //else {
-      //  controls = new THREE.FirstPersonControls(cube);
-      //  controls.movementSpeed = 2;
-      //  controls.lookSpeed = 0.05;
-      //  controls.lookVertical = false;  //TODO true
-      //}
+        controls = new THREE.DK2Controls(camera);
     }
 
     function degreesToRadians(degree){
@@ -267,19 +256,12 @@
         controls.update(delta/MOVE_FACTOR);
 
         //lock the camera to height = 5
-        camera.position.y = 5;
-        cube.position.y = 5;
+        camera.position.y = 7;
+        // cube.position.y = 5;
         cart_mesh.position.y = 3;
 
-        cart_mesh.position.z = cart_mesh.position.z-3;
+        // cart_mesh.position.z = cart_mesh.position.z-1.05;
         // ---
-
-        // //bind a cube in front of the camera NOT WORKING YET
-        // var zCamVec = new THREE.Vector3(0,4,-5);
-        // var pos = camera.localToWorld(zCamVec);
-        // mesh.position.set(pos.x, pos.y, pos.z);
-        // // mesh.lookAt(camera.position);
-
 
         // update HUD
         HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
@@ -322,32 +304,33 @@
         scene_mesh.scale.z = 15; 
         scene_mesh.receiveShadow = true;
         scene_mesh.castShadow = true;
+        scene.add(scene_mesh);
 
         // i'm getting the scale factor here because 'scene_mesh' is loaded asynchronously
-        getSceneAndMapDimesion(scene_mesh);          
+        // getSceneAndMapDimesion(scene_mesh);          
       });
 
-      loader.load("./models/market_bb.js",
-      function(model, materials) {
-        boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue", transparent: true, opacity: 0.5 })); 
-        boundingBoxMesh.name = 'boundingBoxMesh';
-        boundingBoxMesh.receiveShadow = true;
-        boundingBoxMesh.castShadow = true;
-        boundingBoxMesh.scale.x = 15;
-        boundingBoxMesh.scale.y = 15;
-        boundingBoxMesh.scale.z = 15; 
-        scene.add(boundingBoxMesh);        
+      // loader.load("./models/market_bb.js",
+      // function(model, materials) {
+      //   boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue", transparent: true, opacity: 0.0 })); 
+      //   boundingBoxMesh.name = 'boundingBoxMesh';
+      //   boundingBoxMesh.receiveShadow = true;
+      //   boundingBoxMesh.castShadow = true;
+      //   boundingBoxMesh.scale.x = 15;
+      //   boundingBoxMesh.scale.y = 15;
+      //   boundingBoxMesh.scale.z = 15; 
+      //   scene.add(boundingBoxMesh);        
 
-      });
+      // });
 
 
       loader.load("./models/cart.js",
       function(model, materials) {
         cart_mesh  = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); 
         cart_mesh.name = 'cart';
-        cart_mesh.scale.x = 3;
-        cart_mesh.scale.y = 3;
-        cart_mesh.scale.z = 3;
+        cart_mesh.scale.x = 20;
+        cart_mesh.scale.y = 20;
+        cart_mesh.scale.z = 20;
         cart_mesh.receiveShadow = true;
         cart_mesh.castShadow = true;
         //cart_mesh.position.y = 2.5;
@@ -356,7 +339,7 @@
         cart_mesh.position.y = 0;
         cart_mesh.position.z = 0;
 
-        cart_mesh.rotation.y = -Math.PI /2;
+        // cart_mesh.rotation.y = -Math.PI /2;
 
         scene.add(cart_mesh); 
 

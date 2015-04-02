@@ -139,7 +139,8 @@ THREE.DK2Controls = function(object) {
 
         /* transform camera and controller rotations */
         this.object.setRotationFromQuaternion(finalQuaternion);
-        this.controller.setRotationFromMatrix(this.object.matrix);  
+        this.controller.setRotationFromMatrix(this.object.matrix);
+
       }
       this.lastId = id;
     } 
@@ -150,7 +151,8 @@ THREE.DK2Controls = function(object) {
         gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
         /* transform camera and controller rotations */
         this.object.setRotationFromQuaternion(gloveQuaternion);
-        this.controller.setRotationFromMatrix(this.object.matrix);  
+        this.controller.setRotationFromMatrix(this.object.matrix); 
+        cart_mesh.setRotationFromMatrix(this.object.matrix); 
     }
 
     // update position TODO here for rotate the cart ???
@@ -172,14 +174,14 @@ THREE.DK2Controls = function(object) {
     camera.position.addVectors(this.controller.position, this.headPos);
     cart_mesh.position.addVectors(this.controller.position, this.headPos);
 
-    if(enableCollision) {
-      canMoveLEFT =1;
-      canMoveRIGHT=1;
-      canMoveDOWN=1;
-      canMoveUP=1;
+    // if(enableCollision) {
+    //   canMoveLEFT =1;
+    //   canMoveRIGHT=1;
+    //   canMoveDOWN=1;
+    //   canMoveUP=1;
       
-      handleCollisions(this.controller, this.wasd.right, this.wasd.left, this.wasd.up, this.wasd.down);
-    }
+    //   handleCollisions(this.controller, this.wasd.right, this.wasd.left, this.wasd.up, this.wasd.down);
+    // }
 
       if (ws) {
         if (ws.readyState === 1) {
