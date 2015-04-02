@@ -16,11 +16,9 @@
     
     <script type="text/javascript" src="js/three.min.js"></script>
     <script type="text/javascript" src="js/stats.min.js"></script>
-    <script type="text/javascript" src="js/FirstPersonControls.js"></script>
     <script type="text/javascript" src="js/JSONLoader.js"></script>
     <script type="text/javascript" src="js/OculusRiftEffect_HUD.js"></script>
     <script type="text/javascript" src="js/DK2Controls.js"></script>
-    <script type="text/javascript" src="js/dat.gui.min.js"></script>
     <script type="text/javascript" src="js/HUD.js"></script>
     <script src="js/socket.io.js"></script>
 
@@ -57,7 +55,7 @@
       // game state
       var pause = false;
 
-      var scene_mesh, boundingBoxMesh, cart_mesh, mesh;
+      var scene_mesh,cart_mesh;
       var light;
       var ambientLightColor = ARTIFICIAL_LIGHT;
 
@@ -95,12 +93,7 @@
 
       window.onkeydown = function(e) {
           var key = e.keyCode ? e.keyCode : e.which;
-          /*
-          // 16 = shift
-          if (key == 16) {
-             running = 1;
-          }
-          */
+
       }
 
       window.onkeyup = function(e) {
@@ -118,13 +111,6 @@
           if(key == 67) {
             
           }
-
-          /*
-          // 16 = shift
-          if (key == 16) {
-            running = false;
-          }
-          */
 
           // 79 = o
           if (key == 79) {
@@ -160,20 +146,6 @@
       camera.position.y = 6;
       camera.position.z = 0;
 
-      // // add a random cube to the scene
-      // var cubeGeometry = new THREE.CubeGeometry(2, 2, 2);
-      // var cubeMaterial = new THREE.MeshLambertMaterial({ color: "red" });
-      // var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
-      // cube = new THREE.Mesh(cubeGeometry, wireMaterial);
-      // cube.castShadow = true;
-      // cube.position.x = 0;
-      // cube.position.y = 0;
-      // cube.position.z = 0;
-
-      // actualPosition = cube.position.clone();
-
-      // not sure if useful .... yet
-      // cube.add(camera);
       scene.add(camera);
       
       
@@ -215,8 +187,6 @@
 
     /* web socket */
       socket.on('data',function(data){  
-
-        
 
           if (data.pitch>0.7){
             if(!oculusEnabled)
@@ -305,24 +275,8 @@
         scene_mesh.receiveShadow = true;
         scene_mesh.castShadow = true;
         scene.add(scene_mesh);
-
-        // i'm getting the scale factor here because 'scene_mesh' is loaded asynchronously
-        // getSceneAndMapDimesion(scene_mesh);          
+        
       });
-
-      // loader.load("./models/market_bb.js",
-      // function(model, materials) {
-      //   boundingBoxMesh = new THREE.Mesh( model,  new THREE.MeshLambertMaterial({ color: "blue", transparent: true, opacity: 0.0 })); 
-      //   boundingBoxMesh.name = 'boundingBoxMesh';
-      //   boundingBoxMesh.receiveShadow = true;
-      //   boundingBoxMesh.castShadow = true;
-      //   boundingBoxMesh.scale.x = 15;
-      //   boundingBoxMesh.scale.y = 15;
-      //   boundingBoxMesh.scale.z = 15; 
-      //   scene.add(boundingBoxMesh);        
-
-      // });
-
 
       loader.load("./models/cart.js",
       function(model, materials) {
@@ -333,37 +287,14 @@
         cart_mesh.scale.z = 20;
         cart_mesh.receiveShadow = true;
         cart_mesh.castShadow = true;
-        //cart_mesh.position.y = 2.5;
-        //cart_mesh.position.set( 0, 0, - 3);
+
         cart_mesh.position.x = 0;
         cart_mesh.position.y = 0;
         cart_mesh.position.z = 0;
-
-        // cart_mesh.rotation.y = -Math.PI /2;
-
-        scene.add(cart_mesh); 
+        scene.add(cart_mesh);
 
         rdy = true;
       });
-    }
-
-    function getSceneAndMapDimesion(scene_mesh) {
-
-      // gettin mesh size sceneX x sceneZ
-      var box = new THREE.Box3().setFromObject( scene_mesh );
-
-      sceneX = box.size().x; // the real length of the path is 4
-      sceneZ = box.size().z;
-
-      box = new THREE.Box3().setFromObject( HUD.minimap );
-      mapX = box.size().x;
-      mapY = box.size().y;
-
-      console.log("scene size: " +sceneX +" x " +sceneZ);
-      console.log("minimap size: " +mapX +" x " +mapY);
-
-      scene.add(scene_mesh);
-        // // i'm getting the scale factor here because 'scene_mesh' is loaded asynchronously
     }
     
     /**
