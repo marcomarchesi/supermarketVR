@@ -152,13 +152,29 @@ THREE.DK2Controls = function(object) {
        }   
     }
      
-    if (this.wasd.down)
-      this.controller.translateZ(this.translationSpeed * delta);
-    if (this.wasd.right)
-      this.controller.translateX(this.translationSpeed * delta);
-    if (this.wasd.left)
-      this.controller.translateX(-this.translationSpeed * delta);
-
+    if (this.wasd.down){
+      var isColliding = collision.detect(this.controller.position.x,this.controller.position.z + this.translationSpeed * delta * walkingFactor);
+       console.log(isColliding);
+       if(isColliding == 0){
+         this.controller.translateZ(this.translationSpeed * delta * walkingFactor);
+       }   
+    }
+     
+    if (this.wasd.right){
+      var isColliding = collision.detect(this.controller.position.x + this.translationSpeed * delta,this.controller.position.z);
+       console.log(isColliding);
+       if(isColliding == 0){
+         this.controller.translateX(this.translationSpeed * delta);
+       } 
+    }
+      
+    if (this.wasd.left){
+      var isColliding = collision.detect(this.controller.position.x - this.translationSpeed * delta,this.controller.position.z);
+       console.log(isColliding);
+       if(isColliding == 0){
+         this.controller.translateX(-this.translationSpeed * delta);
+       } 
+    }
 
     // both camera and object (camera's bounding box) need to be updated
     this.object.position.addVectors(this.controller.position, this.headPos);

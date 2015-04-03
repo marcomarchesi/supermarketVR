@@ -193,7 +193,7 @@
     /* web socket */
       socket.on('data',function(data){  
 
-          if (data.pitch>0.7){
+          if(data.pitch>0.7){
             if(!oculusEnabled)
               controls.moveForward = true ;
             else
@@ -201,17 +201,29 @@
 
             walkingFactor = data.pitch/2;
             controls.lookSpeed += data.yaw/400;
-          }else{
+          }else if (data.pitch < -0.7){
             if(!oculusEnabled)
-              controls.moveForward = false ;
+              controls.moveBackward = true ;
             else
-              controls.wasd.up = false;
+              controls.wasd.down = true;
 
+            walkingFactor = data.pitch/2;;
+            controls.lookSpeed += data.yaw/400;
+          }
+          else{
+
+              if(!oculusEnabled){
+                controls.moveForward = false ;
+                controls.moveBackward = false;
+              }  
+              else{
+                controls.wasd.up = false;
+                controls.wasd.down = false;
+              }
             walkingFactor = 0;
             controls.lookSpeed += data.yaw/10;
           }
-
-          console.log(controls.lookSpeed);
+          // console.log(controls.lookSpeed);
       });
 
     function setControls() {
