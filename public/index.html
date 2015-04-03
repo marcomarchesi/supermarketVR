@@ -20,9 +20,8 @@
     <script type="text/javascript" src="js/OculusRiftEffect_HUD.js"></script>
     <script type="text/javascript" src="js/DK2Controls.js"></script>
     <script type="text/javascript" src="js/HUD.js"></script>
+    <script type="text/javascript" src="js/LOLCollision.js"></script>
     <script src="js/socket.io.js"></script>
-
-
     <script type="text/javascript">
 
       var socket = io.connect('http://localhost:8001');
@@ -67,12 +66,14 @@
       var walkingFactor = 1;
       var MOVE_FACTOR = 2;
 
-      var cube;
+      // var cube;
 
       var stats;
 
+      var collision;
+
       var rdy = false;
-      var enableCollision = true;
+      // var enableCollision = true;
 
       function init() {
 
@@ -127,6 +128,10 @@
 
       // create a scene, that will hold all our elements such as objects, cameras and lights.
       scene = new THREE.Scene;
+
+      // added LOL collisions
+      collision = new LOLCollision(40);
+      collision.create(10);
 
       // create a render, sets the background color and the size
       renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
