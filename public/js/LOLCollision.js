@@ -13,15 +13,17 @@ function LOLCollision(sceneSize){
 }
 
 // scene 50x50
-// data 3x3
+// data 5x5
 // map 10x10
 
 /* it will receive a .png map as input */
 LOLCollision.prototype.create = function(mapSize){
 
-  var data = [[0,1,0],
-             [0,1,1],
-             [1,0,1]];
+  var data = [[0,1,1,1,1],
+              [1,1,1,1,1],
+              [1,0,0,0,1],
+              [1,0,0,0,1],
+              [1,0,0,0,1]];
 
   this.mapFactor = (data.length - 1)/(mapSize-1);  //  SIZE(DATA) - 1 / SIZE(MAP) - 1
 

@@ -135,7 +135,6 @@ THREE.DK2Controls = function(object) {
 
         var gloveQuaternion = new THREE.Quaternion();
         gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
-        /* transform camera and controller rotations */
         this.object.setRotationFromQuaternion(gloveQuaternion);
         this.controller.setRotationFromMatrix(this.object.matrix); 
         cart_mesh.setRotationFromMatrix(this.object.matrix); 
@@ -149,7 +148,7 @@ THREE.DK2Controls = function(object) {
       var turnQuaternion = new THREE.Quaternion();
       turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
 
-      var isColliding = collision.detect(this.controller.position.x * (1 - Math.cos(this.lookSpeed)), this.controller.position.z - 2 * (1 - Math.sin(this.lookSpeed)));
+      var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
       console.log(isColliding);
       if(isColliding == 0){
         /* transform camera and controller rotations */
@@ -163,7 +162,7 @@ THREE.DK2Controls = function(object) {
       this.lookSpeed += -0.02;
       var turnQuaternion = new THREE.Quaternion();
       turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
-      var isColliding = collision.detect(this.controller.position.x * (1 - Math.cos(this.lookSpeed)), this.controller.position.z - 2 * (1 - Math.sin(this.lookSpeed)));
+      var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
       console.log(isColliding);
       if(isColliding == 0){
         /* transform camera and controller rotations */
