@@ -80,8 +80,8 @@
       // @by Filippo Lo Bue
       var neurosky_position = {};
       var cube;
-      var min_att_cube = [98,99];
-      var min_med_cube = [98,99];
+      var min_att_cube = [60,80];
+      var min_med_cube = [60,80];
       var y_cube_offset_att = 2;
       var y_cube_offset_med = 3;
       var neurosky_flag = true;
@@ -136,6 +136,19 @@
           // 72 = h
           if (key == 72) {
             HUDEnabled = HUDEnabled ? false : true;
+          }
+
+
+          //78 = n
+          if (key == 78){
+            neurosky_flag = neurosky_flag ? false : true;
+            if (!neurosky_flag) {
+              ccubes.traverse( function ( object ) { object.visible = false; } );
+              // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = false; } );
+            }else{
+              ccubes.traverse( function ( object ) { object.visible = true; } );
+              // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = true; } );
+            }
           }
 
       }
@@ -205,29 +218,31 @@
     }
 
     /* web socket */
-      socket.on('data',function(data){  
+      socket.on('data',function(data){ 
+
+          // console.log("receiving data"); 
 
           if(data.pitch>0.7){
-              controls.wasd.up = true;
-              walkingFactor = data.pitch/2;
+              controls.wasdqe.up = true;
+              walkingFactor = data.pitch/1.8;
               controls.lookSpeed += data.yaw/400;
           }else if (data.pitch < -0.7){
-              controls.wasd.down = true;
-              walkingFactor = data.pitch/2;;
+              controls.wasdqe.down = true;
+              walkingFactor = data.pitch/1.8;
               controls.lookSpeed += data.yaw/400;
           }
           else{
-                controls.wasd.up = false;
-                controls.wasd.down = false;
+                controls.wasdqe.up = false;
+                controls.wasdqe.down = false;
                 walkingFactor = 0;
-                controls.lookSpeed += data.yaw/10;
+                controls.lookSpeed += data.yaw/15;
           }
           // console.log(controls.lookSpeed);
       });
 
-    /* NEUROSKY SOCKET */
+    /* NEUROSKY HANDLER */
     socket.on('neurosky',function(data){
-        // console.log('message received is ' + data);
+        console.log('Attention acquired is ' + data.eSense.attention);
         if (neurosky_flag)  //se nascondo i cubi non ne creo fino a quando non ripremo la n
         {
             if (data.eSense.attention >= min_att_cube[1]) {
@@ -235,16 +250,16 @@
             }else if (data.eSense.attention >= min_att_cube[0]) {
               createCube(y_cube_offset_att, 0xff0000,0.3);
             }
-            if (data.eSense.meditation >= min_med_cube[1]) {
-              createCube(y_cube_offset_med, 0x0000ff, 0.8);
-            }else if(data.eSense.meditation >= min_med_cube[0]){
-              createCube(y_cube_offset_med, 0x0000ff, 0.3);
-            }
+            // if (data.eSense.meditation >= min_med_cube[1]) {
+            //   createCube(y_cube_offset_med, 0x0000ff, 0.8);
+            // }else if(data.eSense.meditation >= min_med_cube[0]){
+            //   createCube(y_cube_offset_med, 0x0000ff, 0.3);
+            // }
         }
       });
 
     function createCube(y_offset, color, opacity_value){
-      cube = new THREE.Mesh(new THREE.CubeGeometry(0.5,0.5,0.5),new THREE.MeshLambertMaterial({color:'red', transparent: true, opacity: opacity_value}));
+      cube = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5),new THREE.MeshLambertMaterial({color:'red', transparent: true, opacity: opacity_value}));
       cube.position.x=camera.position.x;
       cube.position.y=camera.position.y + y_offset;
       cube.position.z=camera.position.z;
@@ -262,7 +277,6 @@
       console.log('camera pos: ('+camera.position.x.toFixed(3)+','+camera.position.y.toFixed(3)+','+camera.position.z.toFixed(3)+')');
       console.log('dir vector: ('+dir.x.toFixed(3)+','+dir.y.toFixed(3)+','+dir.z.toFixed(3)+')');
     }
-
     /* END OF NEUROSKY HANDLER */
 
 
@@ -296,7 +310,7 @@
 
 
         //lock the camera to height = 5
-        camera.position.y = 7;
+        camera.position.y = 8;
         // cube.position.y = 5;
         cart_mesh.position.y = 3;
 
@@ -352,9 +366,9 @@
       function(model, materials) {
         cart_mesh  = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); 
         cart_mesh.name = 'cart';
-        cart_mesh.scale.x = 20;
-        cart_mesh.scale.y = 20;
-        cart_mesh.scale.z = 20;
+        cart_mesh.scale.x = 25;
+        cart_mesh.scale.y = 25;
+        cart_mesh.scale.z = 25;
         cart_mesh.receiveShadow = true;
         cart_mesh.castShadow = true;
 

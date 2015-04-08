@@ -20,17 +20,22 @@ app.get('/', function(req, res) {
 
 
 
-/* Neurosky recording data */
-var client = neurosky.createClient({
-    appName: 'supermarketVR',
-    appKey: '123123123123'
-});
-client.on('data',function(data){
+// /* Neurosky recording data */
+// var client = neurosky.createClient({
+//     appName: 'supermarketVR',
+//     appKey: '123123123123'
+// });
+// client.on('data',function(data){
 
-  /* good signal acquired */
-  if (data.poorSignalLevel==0) {
-    io.sockets.emit('neurosky',data);
-  }
+//   console.log('received')
 
-});
-client.connect();
+//    // good signal acquired 
+//   if (data.poorSignalLevel==0) {
+//     io.sockets.emit('neurosky',data);
+//   }
+
+// });
+// // client.on('error',function(err){
+// //   console.log(err);
+// // });
+// client.connect();

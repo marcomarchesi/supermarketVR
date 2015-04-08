@@ -19,6 +19,16 @@ function LOLCollision(sceneSize){
 /* it will receive a .png map as input */
 LOLCollision.prototype.create = function(mapSize){
 
+
+
+  function Create2DArray(rows,columns) {
+   var x = new Array(rows);
+   for (var i = 0; i < rows; i++) {
+       x[i] = new Array(columns);
+   }
+   return x;
+  }
+
   var data = [[0,1,1,1,1],
               [1,1,1,1,1],
               [1,0,0,0,1],
@@ -27,17 +37,7 @@ LOLCollision.prototype.create = function(mapSize){
 
   this.mapFactor = (data.length - 1)/(mapSize-1);  //  SIZE(DATA) - 1 / SIZE(MAP) - 1
 
-
-  this.map = [[0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0,0,0,0]];
+  this.map = Create2DArray(mapSize,mapSize);  //map data to nxn array
 
 
   for (var i = 0; i < mapSize;++i)

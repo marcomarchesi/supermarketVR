@@ -126,19 +126,20 @@ THREE.DK2Controls = function(object) {
 
         //TODO calculate position with angle from 'this.lookSpeed'
         this.controller.setRotationFromMatrix(this.object.matrix);
+        cart_mesh.setRotationFromQuaternion(gloveQuaternion); 
 
       }
       this.lastId = id;
     } 
-    /* OCULUS OFF */
-    else {
+    // /* OCULUS OFF */
+    // else {
 
-        var gloveQuaternion = new THREE.Quaternion();
-        gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
-        this.object.setRotationFromQuaternion(gloveQuaternion);
-        this.controller.setRotationFromMatrix(this.object.matrix); 
-        cart_mesh.setRotationFromMatrix(this.object.matrix); 
-    }
+    //     var gloveQuaternion = new THREE.Quaternion();
+    //     gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
+    //     this.object.setRotationFromQuaternion(gloveQuaternion);
+    //     this.controller.setRotationFromMatrix(this.object.matrix); 
+    //     cart_mesh.setRotationFromMatrix(this.object.matrix); 
+    // }
 
 
     /* CHECK KEY CONTROLS */
@@ -148,28 +149,44 @@ THREE.DK2Controls = function(object) {
       var turnQuaternion = new THREE.Quaternion();
       turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
 
-      var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
-      console.log(isColliding);
-      if(isColliding == 0){
+      // var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
+      // console.log(isColliding);
+      // if(isColliding == 0){
         /* transform camera and controller rotations */
-        this.object.setRotationFromQuaternion(turnQuaternion);
-        this.controller.setRotationFromMatrix(this.object.matrix); 
+
+        var finalQuaternion = new THREE.Quaternion();
+        finalQuaternion.multiplyQuaternions(turnQuaternion,this.headQuat);
+        /* transform camera and controller rotations */
+        this.object.setRotationFromQuaternion(finalQuaternion);
+        //TODO calculate position with angle from 'this.lookSpeed'
+        this.controller.setRotationFromMatrix(this.object.matrix);
+
+
+        // this.object.setRotationFromQuaternion(turnQuaternion);
+        // this.controller.setRotationFromMatrix(this.object.matrix); 
         cart_mesh.setRotationFromMatrix(this.object.matrix); 
-      }
+      // }
     }
 
     if(this.wasdqe.turnRight){
       this.lookSpeed += -0.02;
       var turnQuaternion = new THREE.Quaternion();
       turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
-      var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
-      console.log(isColliding);
-      if(isColliding == 0){
+      // var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
+      // console.log(isColliding);
+      // if(isColliding == 0){
         /* transform camera and controller rotations */
-        this.object.setRotationFromQuaternion(turnQuaternion);
-        this.controller.setRotationFromMatrix(this.object.matrix); 
+        var finalQuaternion = new THREE.Quaternion();
+        finalQuaternion.multiplyQuaternions(turnQuaternion,this.headQuat);
+        /* transform camera and controller rotations */
+        this.object.setRotationFromQuaternion(finalQuaternion);
+        //TODO calculate position with angle from 'this.lookSpeed'
+        this.controller.setRotationFromMatrix(this.object.matrix);
+
+        // this.object.setRotationFromQuaternion(turnQuaternion);
+        // this.controller.setRotationFromMatrix(this.object.matrix); 
         cart_mesh.setRotationFromMatrix(this.object.matrix); 
-      }
+      // }
     }
 
     // update position TODO here for rotate the cart ???
@@ -189,21 +206,21 @@ THREE.DK2Controls = function(object) {
        }   
     }
      
-    // if (this.wasdqe.right){
-    //   var isColliding = collision.detect(this.controller.position.x + this.translationSpeed * delta,this.controller.position.z);
-    //    console.log(isColliding);
-    //    if(isColliding == 0){
-    //      this.controller.translateX(this.translationSpeed * delta);
-    //    } 
-    // }
+    if (this.wasdqe.right){
+      var isColliding = collision.detect(this.controller.position.x + this.translationSpeed * delta,this.controller.position.z);
+       console.log(isColliding);
+       if(isColliding == 0){
+         this.controller.translateX(this.translationSpeed * delta);
+       } 
+    }
       
-    // if (this.wasdqe.left){
-    //   var isColliding = collision.detect(this.controller.position.x - this.translationSpeed * delta,this.controller.position.z);
-    //    console.log(isColliding);
-    //    if(isColliding == 0){
-    //      this.controller.translateX(-this.translationSpeed * delta);
-    //    } 
-    // }
+    if (this.wasdqe.left){
+      var isColliding = collision.detect(this.controller.position.x - this.translationSpeed * delta,this.controller.position.z);
+       console.log(isColliding);
+       if(isColliding == 0){
+         this.controller.translateX(-this.translationSpeed * delta);
+       } 
+    }
 
 
     /* UPDATE POSITIONS */

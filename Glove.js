@@ -5,6 +5,12 @@ var chalk = require('chalk');
 var fs = require('fs');
 var _ = require('underscore');
 var io = require('socket.io');
+var neurosky  = require('node-neurosky');
+var neurosky_position = {};
+var sim_neurosky_att, sim_neurosky_med;
+var neurosky_data = {
+    eSense: {attention: 0, meditation: 0}
+};
 
 // Serial port
 var serialport = require("serialport").SerialPort;
@@ -74,6 +80,7 @@ var sampleCounter = 0;
 
 var io = require('socket.io').listen(8001);
 
+
 console.log("Hello Glove!");
 
 // var quaternion = require("./Quaternion.js");
@@ -89,9 +96,7 @@ console.log("Hello Glove!");
 var opened_port = BT_PORT;
 
 var sp = new serialport(opened_port, {
-  baudrate: BAUD_RATE,
-  rtscts: false,
-  flowControl: false
+  baudrate: BAUD_RATE
 });
 
     /* OPEN SERIAL PORT */
@@ -289,7 +294,28 @@ io.sockets.on('connection', function (socket) {
   socket.on('stop',function(data) {
     onStop(data.gesture);
   });
+
+  socket.on('camera',function (camera_data){
+    neurosky_position = camera_data;
+    // console.log('message camera_pos: (' + neurosky_position.x + ',' + neurosky_position.y + ',' + neurosky_position.z + ')');
+  });
 });
+
+// /* Neurosky recording data */
+// var client = neurosky.createClient({
+//     appName: 'supermarketVR',
+//     appKey: '123123123123'
+// });
+
+// client.on('data',function(data){
+
+//    // good signal acquired 
+// if (data.poorSignalLevel==0) {
+//     io.sockets.emit('neurosky',data);
+// }
+
+// });
+// client.connect();
 
 
 /* onStop()
