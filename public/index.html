@@ -2,18 +2,19 @@
   <head>
     <title>A Threejs Scene</title>
     <style>
-       
       body {
         margin: 0;
         overflow: hidden;
       }
-
     </style>
-
   </head>
-
   <body>
-    
+<img id="map" src="map_x2.bmp" style="display:none;">
+<canvas id="mycanvas" style="display:none;">
+    <div id="fallback">
+    </div>
+<canvas>
+</script>
     <script type="text/javascript" src="js/three.min.js"></script>
     <script type="text/javascript" src="js/stats.min.js"></script>
     <script type="text/javascript" src="js/JSONLoader.js"></script>
@@ -30,7 +31,6 @@
       var stepCount = 0;
 
       //Global variables.
-
       // body components
       var container, content;
 
@@ -40,7 +40,7 @@
       var camera;
       var HUDscene, HUDcamera;
 
-      var oculusEnabled = true;
+      var oculusEnabled = false;
 
       // scene scale
       var sceneX, sceneZ;
@@ -55,6 +55,8 @@
       var pause = false;
 
       var scene_mesh,cart_mesh;
+
+      var scene_mesh_dim;
       var light;
       var ambientLightColor = ARTIFICIAL_LIGHT;
 
@@ -63,18 +65,35 @@
       var clock = new THREE.Clock();
       var delta;
 
+<<<<<<< HEAD
       var walkingFactor = 1;
       var MOVE_FACTOR = 2;
-
-      // var cube;
-
+=======
+      var walkingFactor = 2;
       var stats;
 
+//--------------------------------------------VARIABILI FILIPPO
+      var neurosky_position = {};
+      var cube;
+      var min_att_cube = [98,99];
+      var min_med_cube = [98,99];
+      var y_cube_offset_att = 2;
+      var y_cube_offset_med = 3;
+
+      var neurosky_flag = true; //true: si vedono i cubi altrimenti vengono nascosti i cubi gia'presenti e nessun altro viene generato
+      //creo un contenitore vuoto di cubi
+      var ccubes = new THREE.Object3D();
+//-------------------------------------------------------------
+      function init() {
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+
+
+<<<<<<< HEAD
       var collision;
+      var scale_factor = 25;
 
       var rdy = false;
       // var enableCollision = true;
-
 
       /* NEUROSKY DATA */ 
       // @by Filippo Lo Bue
@@ -86,10 +105,33 @@
       var y_cube_offset_med = 3;
       var neurosky_flag = true;
       var ccubes = new THREE.Object3D();  
-      /*****************/
+      /*************************/
+=======
+      /* web socket */
+      socket.on('message',function(data){
+        console.log('message received is ' + data);
+      });
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+
+      socket.on('neurosky',function(data){
+        // console.log('message received is ' + data);
+
+    if (neurosky_flag)  //se nascondo i cubi non ne creo fino a quando non ripremo la n
+    {
+        if (data.eSense.attention >= min_att_cube[1]) {
+          createCube(y_cube_offset_att, 0xff0000,0.8);
+        }else if (data.eSense.attention >= min_att_cube[0]) {
+          createCube(y_cube_offset_att, 0xff0000,0.3);
+        }
 
 
-      function init() {
+        if (data.eSense.meditation >= min_med_cube[1]) {
+          createCube(y_cube_offset_med, 0x0000ff, 0.8);
+        }else if(data.eSense.meditation >= min_med_cube[0]){
+          createCube(y_cube_offset_med, 0x0000ff, 0.3);
+        }
+    }
+      });
 
       // creating body
       // ---------------------------------------------
@@ -107,8 +149,8 @@
       // ---------------------------------------------
 
       window.onkeydown = function(e) {
+        //
           var key = e.keyCode ? e.keyCode : e.which;
-
       }
 
       window.onkeyup = function(e) {
@@ -120,6 +162,8 @@
               pause = false;
             else
               pause = true;
+
+
           }
 
           // 67 = c
@@ -138,27 +182,33 @@
             HUDEnabled = HUDEnabled ? false : true;
           }
 
-
           //78 = n
           if (key == 78){
             neurosky_flag = neurosky_flag ? false : true;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
             if (!neurosky_flag) {
               ccubes.traverse( function ( object ) { object.visible = false; } );
               // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = false; } );
             }else{
+<<<<<<< HEAD
               ccubes.traverse( function ( object ) { object.visible = true; } );
               // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = true; } );
             }
           }
-
       }
+=======
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
 
+              ccubes.traverse( function ( object ) { object.visible = true; } );
+              // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = true; } );
+            }
+          }
+    }
       // create a scene, that will hold all our elements such as objects, cameras and lights.
       scene = new THREE.Scene;
-
-      // added LOL collisions
-      collision = new LOLCollision(40);
-      collision.create(10);
 
       // create a render, sets the background color and the size
       renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
@@ -178,8 +228,14 @@
       camera.position.y = 6;
       camera.position.z = 0;
 
+<<<<<<< HEAD
       scene.add(camera);
-      
+=======
+      // position and point the default camera to the center of the scene
+      camera.position.x = 0;
+      camera.position.y = 0;
+      camera.position.z = 0;
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
       
       // --- hud
       // create a scene that will hold all hud elements and an ortho camera to always show them on top of the game scene
@@ -198,12 +254,17 @@
       light.castShadow = true;
       scene.add(light);
 
-      var ambientLight = new THREE.AmbientLight( ambientLightColor );
+      var ambientLight = new THREE.AmbientLight( 0x404040 );
+      ambientLight.intensity = 0.1;
       scene.add(ambientLight );
 
       // load scene model
       loader = new THREE.JSONLoader();
       loadScene();
+
+      // added LOL collisions
+      //collision = new LOLCollision(scene_mesh_dim);
+      //collision.create(20);
 
       // debug controls
       setControls();
@@ -212,10 +273,9 @@
 
       // add the output of the renderer to the html element
       content.appendChild(renderer.domElement);
-
       // call the render function, after the first render, interval is determined by requestAnimationFrame
       render(0.016);
-    }
+    }//end init
 
     /* web socket */
       socket.on('data',function(data){ 
@@ -240,8 +300,8 @@
           // console.log(controls.lookSpeed);
       });
 
-    /* NEUROSKY HANDLER */
-    socket.on('neurosky',function(data){
+      /* NEUROSKY HANDLER */
+      socket.on('neurosky',function(data){
         console.log('Attention acquired is ' + data.eSense.attention);
         if (neurosky_flag)  //se nascondo i cubi non ne creo fino a quando non ripremo la n
         {
@@ -279,14 +339,34 @@
     }
     /* END OF NEUROSKY HANDLER */
 
+    function createCube(y_offset, color, opacity_value){
+      cube = new THREE.Mesh(new THREE.CubeGeometry(0.5,0.5,0.5),new THREE.MeshLambertMaterial({color:'red', transparent: true, opacity: opacity_value}));
+      cube.position.x=camera.position.x;
+      cube.position.y=camera.position.y + y_offset;
+      cube.position.z=camera.position.z;
+      cube.material.color.setHex(color);
+      ccubes.add(cube);
+      scene.add(ccubes);
+    }
 
+    function printDirectionVector(){
+      // var pLocal = new THREE.Vector3( 0, 0, -1 );
+      // var pWorld = pLocal.applyMatrix4(camera.matrixWorld);
+      // var dir = pWorld.sub(camera.position).normalize();
+      var dir = new THREE.Vector3( 0, 0, -1 );
+      dir.applyQuaternion( camera.quaternion );
+      console.log('camera pos: ('+camera.position.x.toFixed(3)+','+camera.position.y.toFixed(3)+','+camera.position.z.toFixed(3)+')');
+      console.log('dir vector: ('+dir.x.toFixed(3)+','+dir.y.toFixed(3)+','+dir.z.toFixed(3)+')');
+    }
 
     function setControls() {
       // Oculus DK2 controls
         controls = new THREE.DK2Controls(camera);
+<<<<<<< HEAD
     }
 
     function degreesToRadians(degree){
+      //
         return degree*(Math.PI/180);
     }
     
@@ -299,15 +379,29 @@
 
 
       /* NEUROSKY UPDATE */
+=======
+      else {
+        controls = new THREE.FirstPersonControls(camera);
+        controls.movementSpeed = 2;
+        controls.lookSpeed = 1;
+        controls.lookVertical = false;  //TODO true
+      }
+    }
+    
+    function render(dt) {
+
+      delta = clock.getDelta();
+
+      controls.update(delta);
+      // ---
+    
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
       neurosky_position.x = parseFloat(camera.position.x).toFixed(2);
       neurosky_position.y = parseFloat(camera.position.y).toFixed(2);
       neurosky_position.z = parseFloat(camera.position.z).toFixed(2);
       //console.log('(x,y,z) =' + '(' + neurosky_position.x+','+neurosky_position.y+','+neurosky_position.z+ ')');
       socket.emit('camera',neurosky_position);
-
-
-
-
+<<<<<<< HEAD
 
         //lock the camera to height = 5
         camera.position.y = 8;
@@ -334,6 +428,31 @@
           renderer.render(HUDscene, HUDcamera);
         }
         stats.update();
+=======
+      //printDirectionVector();
+      
+  /*
+      var vector = new THREE.Vector3( 0, 0, -1 );
+      vector.applyQuaternion( camera.quaternion );
+      angle = vector.angleTo( target.position );
+      console.log("angle: " + angle);
+  */
+      // used in PathCamera
+      // TWEEN.update();
+
+
+      //lock the camera to height = 2
+      camera.position.y = 2;
+      // ---
+
+      // update HUD
+      HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
+
+      // update
+      renderer.autoClear = false;
+      if(oculusEnabled == true) {
+        oculusRenderer.render( scene, camera, HUDscene);
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
       }
       requestAnimationFrame( render );
     }
@@ -355,28 +474,39 @@
         scene_mesh.name = 'scene';
         scene_mesh.scale.x = 15;
         scene_mesh.scale.y = 15;
-        scene_mesh.scale.z = 15; 
+        scene_mesh.scale.z = 13; 
         scene_mesh.receiveShadow = true;
         scene_mesh.castShadow = true;
         scene.add(scene_mesh);
         
+        scene_mesh_dim = new THREE.Box3().setFromObject( scene_mesh );
+        collision = new LOLCollision(scene_mesh_dim);
+        collision.create();
+
       });
 
       loader.load("./models/cart.js",
       function(model, materials) {
         cart_mesh  = new THREE.Mesh( model,  new THREE.MeshFaceMaterial( materials ), 0 ); 
         cart_mesh.name = 'cart';
-        cart_mesh.scale.x = 25;
-        cart_mesh.scale.y = 25;
-        cart_mesh.scale.z = 25;
+        cart_mesh.scale.x = scale_factor;
+        cart_mesh.scale.y = scale_factor;
+        cart_mesh.scale.z = scale_factor;
         cart_mesh.receiveShadow = true;
         cart_mesh.castShadow = true;
 
         cart_mesh.position.x = 0;
         cart_mesh.position.y = 0;
         cart_mesh.position.z = 0;
-        scene.add(cart_mesh);
 
+      for (var key in controls.offsetCart) {
+        if (controls.offsetCart.hasOwnProperty(key)) {        
+        sp = new THREE.Mesh(new THREE.SphereGeometry(0.1/scale_factor, 40, 40),new THREE.MeshLambertMaterial({color:'red', transparent: true, opacity: 0.5}));
+        sp.position.set(controls.offsetCart[key][0]/scale_factor,3/scale_factor,controls.offsetCart[key][1]/scale_factor);
+        cart_mesh.add(sp);
+          }
+      }
+        scene.add(cart_mesh);
         rdy = true;
       });
     }
@@ -395,6 +525,9 @@
     window.onload = init;
     // calls the handleResize function when the window is resized
     window.addEventListener('resize', handleResize, false);
+
+
+
 
   </script>
 

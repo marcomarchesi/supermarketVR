@@ -3,17 +3,13 @@ Based on Lars Ivar Hatledal
 
    @modified by Marco Marchesi (quaternions)
 */
-
-
 THREE.DK2Controls = function(object) {
-
   this.object = object;
   this.ws;
   this.sensorData;
   this.lastId = -1;
   
   this.controller = new THREE.Object3D();
-  
   this.headPos = new THREE.Vector3();
   this.headQuat = new THREE.Quaternion();
   
@@ -29,6 +25,15 @@ THREE.DK2Controls = function(object) {
     turnRight: false
   };
   
+  this.offsetCart = {
+    no: [-0.7, -4.8],
+    ne: [0.7, -4.8],
+    so: [-0.7, -2.5],
+    so2: [-0.7, -3.7],
+    se: [0.7, -2.5],
+    se2: [0.7, -3.7]
+  };
+
   var that = this;
   var ws = new WebSocket("ws://localhost:8888/ws");
   ws.onopen = function () {
@@ -103,11 +108,26 @@ THREE.DK2Controls = function(object) {
     }
   };
 
+  function childGlobalPosition(obj){
+    var rows = obj.children.length;
+    var x = new Array(rows);
+
+      if (rows > 0) 
+      {
+        obj.updateMatrixWorld();
+        for (var i = 0; i < rows; i++) 
+        {
+          x[i] = new THREE.Vector3();
+          x[i].setFromMatrixPosition( obj.children[i].matrixWorld );
+        }
+          return x;
+      }else return null;
+  };
 
   this.update = function(delta) {
 
    /* OCULUS ON */
-    if (this.sensorData) { 
+    if (this.sensorData) {
       var id = this.sensorData[0];
       if (id > this.lastId) {
         this.headPos.set(this.sensorData[1]*10, this.sensorData[2]*10, this.sensorData[3]*10);
@@ -133,27 +153,25 @@ THREE.DK2Controls = function(object) {
     } 
     // /* OCULUS OFF */
     // else {
-
     //     var gloveQuaternion = new THREE.Quaternion();
     //     gloveQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
     //     this.object.setRotationFromQuaternion(gloveQuaternion);
     //     this.controller.setRotationFromMatrix(this.object.matrix); 
     //     cart_mesh.setRotationFromMatrix(this.object.matrix); 
     // }
-
-
     /* CHECK KEY CONTROLS */
 
     if(this.wasdqe.turnLeft){
-      this.lookSpeed += 0.02;
-      var turnQuaternion = new THREE.Quaternion();
-      turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
+      var isColliding = iscollided('turnLeft');
 
-      // var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
-      // console.log(isColliding);
-      // if(isColliding == 0){
+      if(isColliding == 0)
+      {
+        this.lookSpeed += 0.02;
+        var turnQuaternion = new THREE.Quaternion();
+        turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
+        // console.log('lookSpeed: ' + this.lookSpeed);
+
         /* transform camera and controller rotations */
-
         var finalQuaternion = new THREE.Quaternion();
         finalQuaternion.multiplyQuaternions(turnQuaternion,this.headQuat);
         /* transform camera and controller rotations */
@@ -161,20 +179,21 @@ THREE.DK2Controls = function(object) {
         //TODO calculate position with angle from 'this.lookSpeed'
         this.controller.setRotationFromMatrix(this.object.matrix);
 
-
-        // this.object.setRotationFromQuaternion(turnQuaternion);
-        // this.controller.setRotationFromMatrix(this.object.matrix); 
-        cart_mesh.setRotationFromMatrix(this.object.matrix); 
-      // }
+        cart_mesh.setRotationFromMatrix(this.object.matrix);
+      }
     }
 
     if(this.wasdqe.turnRight){
-      this.lookSpeed += -0.02;
-      var turnQuaternion = new THREE.Quaternion();
-      turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
-      // var isColliding = collision.detect(this.controller.position.x, this.controller.position.z);
-      // console.log(isColliding);
-      // if(isColliding == 0){
+       var isColliding = iscollided('turnRight');
+
+        if(isColliding == 0)
+        {
+        this.lookSpeed += -0.02;
+        //console.log('lookSpeed: ' + this.lookSpeed);
+        
+        var turnQuaternion = new THREE.Quaternion();
+        turnQuaternion.setFromEuler(new THREE.Euler( 0, this.lookSpeed, 0, 'XYZ' ));
+
         /* transform camera and controller rotations */
         var finalQuaternion = new THREE.Quaternion();
         finalQuaternion.multiplyQuaternions(turnQuaternion,this.headQuat);
@@ -183,45 +202,39 @@ THREE.DK2Controls = function(object) {
         //TODO calculate position with angle from 'this.lookSpeed'
         this.controller.setRotationFromMatrix(this.object.matrix);
 
-        // this.object.setRotationFromQuaternion(turnQuaternion);
-        // this.controller.setRotationFromMatrix(this.object.matrix); 
         cart_mesh.setRotationFromMatrix(this.object.matrix); 
-      // }
+        // }
+        }
     }
 
     // update position TODO here for rotate the cart ???
     if (this.wasdqe.up){
-       var isColliding = collision.detect(this.controller.position.x,this.controller.position.z - this.translationSpeed * delta * walkingFactor);
-       console.log(isColliding);
+        var isColliding = iscollided('up');
        if(isColliding == 0){
         this.controller.translateZ(-this.translationSpeed * delta * walkingFactor);
        }   
     }
      
     if (this.wasdqe.down){
-      var isColliding = collision.detect(this.controller.position.x,this.controller.position.z + this.translationSpeed * delta * walkingFactor);
-       console.log(isColliding);
-       if(isColliding == 0){
+      var isColliding = iscollided('down');
+      if(isColliding == 0){
          this.controller.translateZ(this.translationSpeed * delta * walkingFactor);
        }   
     }
      
     if (this.wasdqe.right){
-      var isColliding = collision.detect(this.controller.position.x + this.translationSpeed * delta,this.controller.position.z);
-       console.log(isColliding);
+      var isColliding = iscollided('right');
        if(isColliding == 0){
-         this.controller.translateX(this.translationSpeed * delta);
+         this.controller.translateX(this.translationSpeed * delta * walkingFactor);
        } 
     }
       
     if (this.wasdqe.left){
-      var isColliding = collision.detect(this.controller.position.x - this.translationSpeed * delta,this.controller.position.z);
-       console.log(isColliding);
+       var isColliding = iscollided('left');
        if(isColliding == 0){
-         this.controller.translateX(-this.translationSpeed * delta);
+         this.controller.translateX(-this.translationSpeed * delta * walkingFactor);
        } 
     }
-
 
     /* UPDATE POSITIONS */
     // both camera and object (camera's bounding box) need to be updated
@@ -229,21 +242,123 @@ THREE.DK2Controls = function(object) {
     camera.position.addVectors(this.controller.position, this.headPos);
     cart_mesh.position.addVectors(this.controller.position, this.headPos);
 
-      if (ws) {
+    if (ws) {
         if (ws.readyState === 1) {
           ws.send("get\n");
         }
       }
-  };
+   };
   
-  window.addEventListener( 'keydown', bind( this, this.onKeyDown ), false );
-  window.addEventListener( 'keyup', bind( this, this.onKeyUp ), false );
+    window.addEventListener( 'keydown', bind( this, this.onKeyDown ), false );
+    window.addEventListener( 'keyup', bind( this, this.onKeyUp ), false );
   
-  function bind( scope, fn ) {
-    return function () {
-      fn.apply( scope, arguments );
+<<<<<<< HEAD
+    function bind( scope, fn ) {
+     return function () {
+       fn.apply( scope, arguments );
+      };
     };
 
-  };
+function iscollided(cmd){
+  var t_x, t_y;
+  var gc = childGlobalPosition(cart_mesh);
+  switch(cmd) {
+    case 'up':
+      for (var i = 0; i < gc.length; i++) {
+        t_x = gc[i].x - Math.sin(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+        t_y = gc[i].z - Math.cos(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+        //console.log('(t_x,t_y)=(' + Math.sin(controls.lookSpeed) + ',' + Math.sin(controls.lookSpeed) + ')');
+        //console.log('coll: ' + collision.detect(t_x,t_y));
+         if(collision.detect(t_x,t_y)) return 1; //collisione
+      }
+      break;
+    case 'down':
+      for (var i = 0; i < gc.length; i++) {
+        t_x = gc[i].x + Math.sin(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+        t_y = gc[i].z + Math.cos(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+         if(collision.detect(t_x,t_y)) return 1; //collisione
+      }
+      break;
+    case 'right':
+      for (var i = 0; i < gc.length; i++) {
+        t_x = gc[i].x + Math.cos(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+        t_y = gc[i].z - Math.sin(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+         if(collision.detect(t_x,t_y)) return 1; //collisione
+      }
+      break;
+    case 'left':
+      for (var i = 0; i < gc.length; i++) {
+        t_x = gc[i].x - Math.cos(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+        t_y = gc[i].z + Math.sin(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+         if(collision.detect(t_x,t_y)) return 1; //collisione
+      }
+      break;
+    case 'turnLeft':
+      for (var i = 0; i < gc.length; i++) {
+        console.log('lookSpeed: ' + controls.lookSpeed);
+        t_x = gc[i].x - Math.sin(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+        t_y = gc[i].z - Math.cos(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+         if(collision.detect(t_x,t_y)) return 1; //collisione
+      }
+      break;
+    case 'turnRight':
+      for (var i = 0; i < gc.length; i++) {
+        console.log('lookSpeed: ' + controls.lookSpeed);
+        t_x = gc[i].x + Math.cos(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+        t_y = gc[i].z - Math.sin(controls.lookSpeed)*(controls.translationSpeed * delta * walkingFactor);
+         if(collision.detect(t_x,t_y)) return 1; //collisione
+      }
+      break;
+  }
 
+  return 0; //nessuna collisione
+};
+
+  //funzione ad uso di debug
+function printSphere(x,z, nome){
+  // console.log('PRINT SPHERE: ' + scene.getObjectByName(nome));
+  var _x = x;
+  var _y = 0;//camera.position.y-2;
+  var _z = z;
+
+  // var dummy = new THREE.Object3D();
+  // dummy.position.y = camera.y;
+  // var your_object = new THREE.Mesh( geometry, material );
+  // your_object.position.x = 100;
+
+
+  // scene.addObject( dummy );
+
+  // if(!scene.getObjectByName(nome))  //non esiste ancora nessun oggetto con nome
+  // {
+  //   sp = new THREE.Mesh(new THREE.SphereGeometry(0.05, 40, 40),new THREE.MeshLambertMaterial({color:'red', transparent: true, opacity: 0.5}));
+  //   sp.position.set(_x,_y,_z);
+  //   // sp.name = nome;
+
+  //   // dummy.add(sp);
+  //   // dummy.name = nome;
+  //   // dummy.position.set(camera.position.x,camera.position.y,camera.position.z);
+  //   scene.remove(cart_mesh);
+  //   cart_mesh.add(sp);
+  //   scene.add(cart_mesh);
+  //   //scene.add(dummy);
+  // } else {
+  //   // scene.getObjectByName(nome).position.set(_x,_y,_z);
+  //   //scene.getObjectByName(nome).position.set(camera.position.x,camera.position.y,camera.position.z);
+  //   // scene.getObjectByName(nome).position = camera.position;
+
+  // }      
+}
+//-------------------------
+
+=======
+  function bind( scope, fn ) {
+
+    return function () {
+
+      fn.apply( scope, arguments );
+    };
+  };
+  
+>>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
 };
