@@ -33,6 +33,8 @@
       //Global variables.
       // body components
       var container, content;
+      var rdy = false;
+      var scale_factor = 25;
 
       var ARTIFICIAL_LIGHT = 0xffffff;
 
@@ -65,34 +67,14 @@
       var clock = new THREE.Clock();
       var delta;
 
-<<<<<<< HEAD
+// <<<<<<< HEAD
       var walkingFactor = 1;
       var MOVE_FACTOR = 2;
-=======
-      var walkingFactor = 2;
-      var stats;
 
-//--------------------------------------------VARIABILI FILIPPO
-      var neurosky_position = {};
-      var cube;
-      var min_att_cube = [98,99];
-      var min_med_cube = [98,99];
-      var y_cube_offset_att = 2;
-      var y_cube_offset_med = 3;
+            var collision;
+      
 
-      var neurosky_flag = true; //true: si vedono i cubi altrimenti vengono nascosti i cubi gia'presenti e nessun altro viene generato
-      //creo un contenitore vuoto di cubi
-      var ccubes = new THREE.Object3D();
-//-------------------------------------------------------------
-      function init() {
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
-
-
-<<<<<<< HEAD
-      var collision;
-      var scale_factor = 25;
-
-      var rdy = false;
+      
       // var enableCollision = true;
 
       /* NEUROSKY DATA */ 
@@ -104,14 +86,36 @@
       var y_cube_offset_att = 2;
       var y_cube_offset_med = 3;
       var neurosky_flag = true;
-      var ccubes = new THREE.Object3D();  
+      var ccubes = new THREE.Object3D(); 
+// =======
+//       var walkingFactor = 2;
+//       var stats;
+
+// //--------------------------------------------VARIABILI FILIPPO
+//       var neurosky_position = {};
+//       var cube;
+//       var min_att_cube = [98,99];
+//       var min_med_cube = [98,99];
+//       var y_cube_offset_att = 2;
+//       var y_cube_offset_med = 3;
+
+//       var neurosky_flag = true; //true: si vedono i cubi altrimenti vengono nascosti i cubi gia'presenti e nessun altro viene generato
+//       //creo un contenitore vuoto di cubi
+//       var ccubes = new THREE.Object3D();
+// //-------------------------------------------------------------
+function init() {
+// >>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+
+
+// <<<<<<< HEAD
+ 
       /*************************/
-=======
-      /* web socket */
-      socket.on('message',function(data){
-        console.log('message received is ' + data);
-      });
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+// =======
+//       /* web socket */
+//       socket.on('message',function(data){
+//         console.log('message received is ' + data);
+//       });
+// >>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
 
       socket.on('neurosky',function(data){
         // console.log('message received is ' + data);
@@ -185,28 +189,28 @@
           //78 = n
           if (key == 78){
             neurosky_flag = neurosky_flag ? false : true;
-<<<<<<< HEAD
-=======
+// <<<<<<< HEAD
+// =======
 
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+// >>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
             if (!neurosky_flag) {
               ccubes.traverse( function ( object ) { object.visible = false; } );
               // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = false; } );
             }else{
-<<<<<<< HEAD
+// <<<<<<< HEAD
               ccubes.traverse( function ( object ) { object.visible = true; } );
               // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = true; } );
             }
           }
       }
-=======
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+// =======
+// >>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
 
-              ccubes.traverse( function ( object ) { object.visible = true; } );
-              // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = true; } );
-            }
-          }
-    }
+          //     ccubes.traverse( function ( object ) { object.visible = true; } );
+          //     // THREE.SceneUtils.traverseHierarchy( ccubes, function ( object ) { object.visible = true; } );
+          //   }
+          // }
+    // }
       // create a scene, that will hold all our elements such as objects, cameras and lights.
       scene = new THREE.Scene;
 
@@ -228,14 +232,14 @@
       camera.position.y = 6;
       camera.position.z = 0;
 
-<<<<<<< HEAD
+// <<<<<<< HEAD
       scene.add(camera);
-=======
-      // position and point the default camera to the center of the scene
-      camera.position.x = 0;
-      camera.position.y = 0;
-      camera.position.z = 0;
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+// =======
+//       // position and point the default camera to the center of the scene
+//       camera.position.x = 0;
+//       camera.position.y = 0;
+//       camera.position.z = 0;
+// >>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
       
       // --- hud
       // create a scene that will hold all hud elements and an ortho camera to always show them on top of the game scene
@@ -362,7 +366,7 @@
     function setControls() {
       // Oculus DK2 controls
         controls = new THREE.DK2Controls(camera);
-<<<<<<< HEAD
+// <<<<<<< HEAD
     }
 
     function degreesToRadians(degree){
@@ -379,29 +383,29 @@
 
 
       /* NEUROSKY UPDATE */
-=======
-      else {
-        controls = new THREE.FirstPersonControls(camera);
-        controls.movementSpeed = 2;
-        controls.lookSpeed = 1;
-        controls.lookVertical = false;  //TODO true
-      }
-    }
+// =======
+//       else {
+//         controls = new THREE.FirstPersonControls(camera);
+//         controls.movementSpeed = 2;
+//         controls.lookSpeed = 1;
+//         controls.lookVertical = false;  //TODO true
+//       }
+//     }
     
-    function render(dt) {
+//     function render(dt) {
 
-      delta = clock.getDelta();
+//       delta = clock.getDelta();
 
-      controls.update(delta);
-      // ---
+//       controls.update(delta);
+//       // ---
     
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+// >>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
       neurosky_position.x = parseFloat(camera.position.x).toFixed(2);
       neurosky_position.y = parseFloat(camera.position.y).toFixed(2);
       neurosky_position.z = parseFloat(camera.position.z).toFixed(2);
       //console.log('(x,y,z) =' + '(' + neurosky_position.x+','+neurosky_position.y+','+neurosky_position.z+ ')');
       socket.emit('camera',neurosky_position);
-<<<<<<< HEAD
+// <<<<<<< HEAD
 
         //lock the camera to height = 5
         camera.position.y = 8;
@@ -428,31 +432,31 @@
           renderer.render(HUDscene, HUDcamera);
         }
         stats.update();
-=======
-      //printDirectionVector();
+// =======
+//       //printDirectionVector();
       
-  /*
-      var vector = new THREE.Vector3( 0, 0, -1 );
-      vector.applyQuaternion( camera.quaternion );
-      angle = vector.angleTo( target.position );
-      console.log("angle: " + angle);
-  */
-      // used in PathCamera
-      // TWEEN.update();
+//   /*
+//       var vector = new THREE.Vector3( 0, 0, -1 );
+//       vector.applyQuaternion( camera.quaternion );
+//       angle = vector.angleTo( target.position );
+//       console.log("angle: " + angle);
+//   */
+//       // used in PathCamera
+//       // TWEEN.update();
 
 
-      //lock the camera to height = 2
-      camera.position.y = 2;
-      // ---
+//       //lock the camera to height = 2
+//       camera.position.y = 2;
+//       // ---
 
-      // update HUD
-      HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
+//       // update HUD
+//       HUD.update(pause, mapX, mapY, sceneX, sceneZ, 0, 0, oculusEnabled);
 
-      // update
-      renderer.autoClear = false;
-      if(oculusEnabled == true) {
-        oculusRenderer.render( scene, camera, HUDscene);
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
+//       // update
+//       renderer.autoClear = false;
+//       if(oculusEnabled == true) {
+//         oculusRenderer.render( scene, camera, HUDscene);
+// >>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
       }
       requestAnimationFrame( render );
     }

@@ -252,7 +252,6 @@ THREE.DK2Controls = function(object) {
     window.addEventListener( 'keydown', bind( this, this.onKeyDown ), false );
     window.addEventListener( 'keyup', bind( this, this.onKeyUp ), false );
   
-<<<<<<< HEAD
     function bind( scope, fn ) {
      return function () {
        fn.apply( scope, arguments );
@@ -351,14 +350,4 @@ function printSphere(x,z, nome){
 }
 //-------------------------
 
-=======
-  function bind( scope, fn ) {
-
-    return function () {
-
-      fn.apply( scope, arguments );
-    };
-  };
-  
->>>>>>> 5aa3c4e4eee309923630b052e3f480743fd2984b
 };
